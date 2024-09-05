@@ -1,0 +1,176 @@
+{
+  "name": "dafny-autopilot",
+  "displayName": "Dafny Autopilot",
+  "publisher": "DafnyAutopilot",
+  "description": "",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:dafny",
+    "onLanguage:python"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "dafny-autopilot.GPTTranslatePython",
+        "title": "Dafny Autopilot: Translate Python (GPT-4o)"
+      },
+      {
+        "command": "dafny-autopilot.ClaudeTranslatePython",
+        "title": "Dafny Autopilot: Translate Python (Claude 3.5)"
+      },
+      {
+        "command": "dafny-autopilot.GPTLangchain",
+        "title": "Dafny Autopilot: Fill in Dafny Annotations (GPT-4o)"
+      },
+      {
+        "command": "dafny-autopilot.ClaudeLangchain",
+        "title": "Dafny Autopilot: Fill in Dafny Annotations (Claude 3.5)"
+      },
+      {
+        "command": "dafny-autopilot.explainDafnyAnnotationGPT",
+        "title": "Dafny Autopilot: Explain Dafny Annotation (GPT-4o)"
+      },
+      {
+        "command": "dafny-autopilot.explainDafnyAnnotationClaude",
+        "title": "Dafny Autopilot: Explain Dafny Annotation (Claude 3.5)"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "dafny-autopilot.GPTLangchain",
+          "group": "navigation",
+          "when": "resourceLangId == dafny"
+        },
+        {
+          "command": "dafny-autopilot.ClaudeLangchain",
+          "group": "navigation",
+          "when": "resourceLangId == dafny"
+        },
+        {
+          "command": "dafny-autopilot.GPTTranslatePython",
+          "group": "navigation",
+          "when": "resourceLangId == python && config.dafny-autopilot.enableDevelopmentFeatures"
+        },
+        {
+          "command": "dafny-autopilot.ClaudeTranslatePython",
+          "group": "navigation",
+          "when": "resourceLangId == python && config.dafny-autopilot.enableDevelopmentFeatures"
+        },
+        {
+          "command": "dafny-autopilot.explainDafnyAnnotationGPT",
+          "group": "navigation",
+          "when": "resourceLangId == dafny && editorHasSelection"
+        },
+        {
+          "command": "dafny-autopilot.explainDafnyAnnotationClaude",
+          "group": "navigation",
+          "when": "resourceLangId == dafny && editorHasSelection"
+        }   
+      ],
+      "explorer/context": [
+        {
+          "command": "dafny-autopilot.GPTLangchain",
+          "group": "navigation",
+          "when": "resourceLangId == dafny"
+        },
+        {
+          "command": "dafny-autopilot.ClaudeLangchain",
+          "group": "navigation",
+          "when": "resourceLangId == dafny"
+        },
+        {
+          "command": "dafny-autopilot.GPTTranslatePython",
+          "group": "navigation",
+          "when": "resourceLangId == python && config.dafny-autopilot.enableDevelopmentFeatures"
+        },
+        {
+          "command": "dafny-autopilot.ClaudeTranslatePython",
+          "group": "navigation",
+          "when": "resourceLangId == python && config.dafny-autopilot.enableDevelopmentFeatures"
+        }
+      ]
+    },
+    "configuration": {
+      "type": "object",
+      "title": "Dafny Autopilot extension configuration",
+      "properties": {
+        "openai.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API key for accessing OpenAI services"
+        },
+        "anthropic.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API key for accessing Claude services"
+        },
+        "dafny-autopilot.dafnyPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to Dafny executable"
+        },
+        "dafny-autopilot.numIterations": {
+          "type": "integer",
+          "default": "",
+          "description": "Maximum number of iterations performed by LLM"
+        },
+        "dafny-autopilot.enableDevelopmentFeatures": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable development-only features"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "node esbuild.mjs --production",
+    "compile": "npm run check-types && npm run lint && node esbuild.mjs",
+    "watch": "npm-run-all -p watch:*",
+    "watch:esbuild": "node esbuild.mjs --watch",
+    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+    "package": "npm run check-types && npm run lint && node esbuild.mjs --production",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint src --ext ts",
+    "test": "vscode-test --extensionDevelopmentPath=. --extensionTestsPath=./out/test",
+    "build-dev": "node esbuild.mjs"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.7",
+    "@types/node": "20.x",
+    "@types/sinon": "^17.0.3",
+    "@types/vscode": "^1.90.0",
+    "@typescript-eslint/eslint-plugin": "^7.11.0",
+    "@typescript-eslint/parser": "^7.11.0",
+    "@vscode/test-cli": "^0.0.9",
+    "@vscode/test-electron": "^2.4.0",
+    "esbuild": "^0.21.5",
+    "eslint": "^8.57.0",
+    "mocha": "^10.5.2",
+    "npm-run-all": "^4.1.5",
+    "sinon": "^18.0.0",
+    "ts-mocha": "^10.0.0",
+    "typescript": "^5.4.5",
+    "vscode-test": "^1.6.1"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.24.3",
+    "@langchain/anthropic": "^0.2.11",
+    "@langchain/community": "^0.2.19",
+    "@langchain/core": "^0.1.5",
+    "child_process": "^1.0.2",
+    "dotenv": "^16.4.5",
+    "langchain": "^0.2.10",
+    "openai": "^4.52.0"
+  }
+}

@@ -1,0 +1,15 @@
+out
+dist
+node_modules
+.vscode-test/
+*.vsix
+
+src/utils/langchain/__pycache__/
+
+# Debugging files
+src/test/*/*_translated*.dfy
+src/test/*_with_hints*.dfy
+src/test/*/*_with_hints*.dfy
+src/test/*_modified.dfy
+src/test/*/*_modified.dfy
+src/test/.vscode

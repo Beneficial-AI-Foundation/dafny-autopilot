@@ -1,8 +1,8 @@
 {
   "name": "dafny-autopilot",
   "displayName": "Dafny Autopilot",
-  "publisher": "DafnyAutopilot",
-  "description": "",
+  "publisher": "BeneficialAIFoundation",
+  "description": "Use LLMs to assist with Dafny development",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.90.0"

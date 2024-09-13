@@ -1,8 +1,6 @@
 import * as fs from 'fs';
 import * as vscode from 'vscode';
 import { PRECONDITION_PROMPT, POSTCONDITION_PROMPT, INVARIANT_PROMPT, FIX_PROMPT, FIX_SYNTAX_PROMPT } from '../prompts';
-import { PRECONDITION_PROMPT as PRECONDITION_PROMPT_OLD, POSTCONDITION_PROMPT as POSTCONDITION_PROMPT_OLD,
-    INVARIANT_PROMPT as INVARIANT_PROMPT_OLD, FIX_PROMPT as FIX_PROMPT_OLD } from '../old-prompts';
 
 import { runDafny, ensureDafnyPath } from '../dafny-helpers';
 

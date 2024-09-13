@@ -1,7 +1,7 @@
 {
   "name": "dafny-autopilot",
   "displayName": "Dafny Autopilot",
-  "publisher": "DafnyAutopilot",
+  "publisher": "BeneficialAIFoundation",
   "description": "LLM-based Dafny Autopilot extension for Visual Studio Code",
   "repository": "https://github.com/Beneficial-AI-Foundation/dafny-autopilot",
   "version": "0.0.1",

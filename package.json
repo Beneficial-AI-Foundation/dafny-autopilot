@@ -1,8 +1,9 @@
 {
   "name": "dafny-autopilot",
   "displayName": "Dafny Autopilot",
-  "publisher": "BeneficialAIFoundation",
-  "description": "Use LLMs to assist with Dafny development",
+  "publisher": "DafnyAutopilot",
+  "description": "LLM-based Dafny Autopilot extension for Visual Studio Code",
+  "repository": "https://github.com/Beneficial-AI-Foundation/dafny-autopilot",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.90.0"
@@ -34,6 +35,10 @@
         "title": "Dafny Autopilot: Fill in Dafny Annotations (Claude 3.5)"
       },
       {
+        "command": "dafny-autopilot.GeminiLangchain",
+        "title": "Dafny Autopilot: Fill in Dafny Annotations (Gemini 1.5 Pro)"
+      },
+      {
         "command": "dafny-autopilot.explainDafnyAnnotationGPT",
         "title": "Dafny Autopilot: Explain Dafny Annotation (GPT-4o)"
       },
@@ -51,6 +56,11 @@
         },
         {
           "command": "dafny-autopilot.ClaudeLangchain",
+          "group": "navigation",
+          "when": "resourceLangId == dafny"
+        },
+        {
+          "command": "dafny-autopilot.GeminiLangchain",
           "group": "navigation",
           "when": "resourceLangId == dafny"
         },
@@ -87,6 +97,11 @@
           "when": "resourceLangId == dafny"
         },
         {
+          "command": "dafny-autopilot.GeminiLangchain",
+          "group": "navigation",
+          "when": "resourceLangId == dafny"
+        },
+        {
           "command": "dafny-autopilot.GPTTranslatePython",
           "group": "navigation",
           "when": "resourceLangId == python && config.dafny-autopilot.enableDevelopmentFeatures"
@@ -110,7 +125,12 @@
         "anthropic.apiKey": {
           "type": "string",
           "default": "",
-          "description": "API key for accessing Claude services"
+          "description": "API key for accessing Anthropic services"
+        },
+        "google.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API key for accessing Google services"
         },
         "dafny-autopilot.dafnyPath": {
           "type": "string",
@@ -165,9 +185,12 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.24.3",
+    "@google/generative-ai": "^0.17.1",
     "@langchain/anthropic": "^0.2.11",
     "@langchain/community": "^0.2.19",
     "@langchain/core": "^0.1.5",
+    "@langchain/google-genai": "^0.0.26",
+    "@vscode/vsce": "^3.1.0",
     "child_process": "^1.0.2",
     "dotenv": "^16.4.5",
     "langchain": "^0.2.10",

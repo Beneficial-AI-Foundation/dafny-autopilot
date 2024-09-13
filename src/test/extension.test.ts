@@ -3,13 +3,13 @@ import * as vscode from 'vscode';
 import * as sinon from 'sinon';
 import OpenAI from 'openai';
 import * as myExtension from '../extension';
-import * as prompts from '../utils/prompts';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as helpers from '../utils/helpers';
 import * as dafnyHelpers from '../utils/dafny-helpers';
 
 let isExtensionActivated = false;
+
 
 suite('Extension Test Suite', () => {
     let sandbox: sinon.SinonSandbox;
@@ -60,11 +60,11 @@ suite('Extension Test Suite', () => {
 
     });
 
+
     teardown(() => {
         sandbox.restore();
     });
 
-    
 
 	test('Extension should be present', () => {
         assert.ok(vscode.extensions.getExtension('DafnyAutopilot.dafny-autopilot'));
@@ -125,8 +125,7 @@ suite('Extension Test Suite', () => {
             }),
             update: sandbox.stub().resolves()
         } as any);
-
-    
+        
         sandbox.stub(fs.promises, 'readFile').resolves('dummy content');
         sandbox.stub(fs.promises, 'writeFile').resolves();
         sandbox.stub(vscode.window, 'showTextDocument').resolves();
@@ -151,6 +150,44 @@ suite('Extension Test Suite', () => {
             placeHolder: 'Enter your Anthropic API key'
         }));
     });
+
+
+    test('Should prompt for Google API key if not set', async () => {
+        const showInputBoxStub = sandbox.stub(vscode.window, 'showInputBox').resolves('test-api-key');
+        const getConfigurationStub = sandbox.stub(vscode.workspace, 'getConfiguration').returns({
+            get: sandbox.stub().callsFake((key: string) => {
+                if (key === 'google.apiKey') {return undefined;}
+                if (key === 'dafny-autopilot.dafnyPath') {return '/path/to/dafny';} // Provide a fake Dafny path
+                return 'some-value';
+            }),
+            update: sandbox.stub().resolves()
+        } as any);
+
+        sandbox.stub(fs.promises, 'readFile').resolves('dummy content');
+        sandbox.stub(fs.promises, 'writeFile').resolves();
+        sandbox.stub(vscode.window, 'showTextDocument').resolves();
+    
+        // Modify callFillHints stub to actually call ensureGeminiApiKey
+        callFillHintsStub.callsFake(async (model, filePath, newFileName) => {
+            if (model.startsWith('gemini')) {
+                await helpers.ensureGeminiApiKey();
+            }
+        });
+
+        const uri = vscode.Uri.file(path.join(__dirname, '..', '..', 'src', 'test', 'test.dfy'));
+        await new Promise<void>(resolve => {
+            vscode.commands.executeCommand('dafny-autopilot.GeminiFillHints', uri);
+            setTimeout(resolve, 350);  // Adjust this delay as needed
+        });
+    
+        assert.ok(showInputBoxStub.calledWith({
+            prompt: 'Please enter your Google API key.',
+            ignoreFocusOut: true,
+            password: true,
+            placeHolder: 'Enter your Google API key'
+        }));
+    });
+
 
     test('Should prompt for Dafny path if not set (when using GPT)', async () => {
         const showInputBoxStub = sandbox.stub(vscode.window, 'showInputBox').resolves('test-dafny-path');
@@ -177,6 +214,7 @@ suite('Extension Test Suite', () => {
         });
     });
     
+
     test('Should prompt for Dafny path if not set (when using Claude)', async () => {
         const showInputBoxStub = sandbox.stub(vscode.window, 'showInputBox').resolves('test-dafny-path');
         const getConfigurationStub = sandbox.stub(vscode.workspace, 'getConfiguration').returns({

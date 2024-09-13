@@ -5,14 +5,15 @@ import { callFillHints, callTranslatePython, callLangChain, explainDafnyAnnotati
 let disposables: vscode.Disposable[] | undefined;
 let outputChannel: vscode.OutputChannel;
 
+
 export function activate(context: vscode.ExtensionContext) {
     outputChannel = vscode.window.createOutputChannel("Dafny Autopilot");
     const config = vscode.workspace.getConfiguration('dafny-autopilot');
     context.subscriptions.push(outputChannel);
     const enableDevFeatures = process.env.DAFNY_AUTOPILOT_DEV === 'true';
     config.update('enableDevelopmentFeatures', enableDevFeatures, vscode.ConfigurationTarget.Workspace);
-
     outputChannel.show(true);
+
     disposables = [
         vscode.commands.registerCommand('dafny-autopilot.GPTFillHints', async (uri: vscode.Uri) => {
             if (!uri) {
@@ -34,6 +35,16 @@ export function activate(context: vscode.ExtensionContext) {
             callFillHints('claude-3-5-sonnet-20240620', filePath, newFileName);
         }),
 
+        vscode.commands.registerCommand('dafny-autopilot.GeminiFillHints', async (uri: vscode.Uri) => {
+            if (!uri) {
+                vscode.window.showErrorMessage('This command must be invoked from a file context.');
+                return;
+            }
+            const filePath = uri.fsPath;
+            const newFileName = `${path.parse(filePath).name}_with_hints${path.parse(filePath).ext}`;
+            callFillHints('gemini-1.5-pro', filePath, newFileName);
+        }),
+
         vscode.commands.registerCommand('dafny-autopilot.ClaudeLangchain', async (uri: vscode.Uri) => {
             if (!uri) {
                 vscode.window.showErrorMessage('This command must be invoked from a file context.');
@@ -51,6 +62,16 @@ export function activate(context: vscode.ExtensionContext) {
             const filePath = uri.fsPath;
             callLangChain('gpt-4o', filePath, outputChannel);
         }),
+
+        vscode.commands.registerCommand('dafny-autopilot.GeminiLangchain', async (uri: vscode.Uri) => {
+            if (!uri) {
+                vscode.window.showErrorMessage('This command must be invoked from a file context.');
+                return;
+            }
+            const filePath = uri.fsPath;
+            callLangChain('gemini-1.5-pro', filePath, outputChannel);
+        }),
+
         vscode.commands.registerCommand('dafny-autopilot.GPTTranslatePython', async (uri: vscode.Uri) => {
             if (!uri) {
                 vscode.window.showErrorMessage('This command must be invoked from a Python file context.');
@@ -68,6 +89,7 @@ export function activate(context: vscode.ExtensionContext) {
             const filePath = uri.fsPath;
             callTranslatePython('claude-3-5-sonnet-20240620', filePath);
         }),
+        
         vscode.commands.registerCommand('dafny-autopilot.explainDafnyAnnotationGPT', async () => {
             const editor = vscode.window.activeTextEditor;
             if (!editor) {
@@ -107,6 +129,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(...disposables);
     outputChannel.appendLine("Dafny Autopilot extension activated");
 }
+
 
 export function deactivate() {
     if (disposables) {

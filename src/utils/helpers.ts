@@ -2,9 +2,9 @@ import * as vscode from 'vscode';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as process from 'process';
-import { execFile } from 'child_process';
 import OpenAI from 'openai';
 import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import * as prompts from './prompts';
 import { DafnyChain } from './langchain/dafny-chain';
 import { runDafny, askDafnyPath, ensureDafnyPath } from './dafny-helpers';
@@ -35,6 +35,8 @@ export async function callFillHints(model: string, filePath: string, newFileName
                 LLMOutput = await GPTFillHints(apiKey, data);
             } else if (model.startsWith('claude')) {
                 LLMOutput = await ClaudeFillHints(apiKey, data);
+            } else if (model.startsWith('gemini')) {
+                LLMOutput = await GeminiFillHints(apiKey, data);
             }
             if (typeof LLMOutput === 'string') {
                 await fs.writeFile(newFilePath, LLMOutput);
@@ -99,6 +101,28 @@ async function ClaudeFillHints(ClaudeApiKey: string | undefined, fileContent: st
             ]
             });
         return (response.content[0] as Anthropic.TextBlock).text;
+    } catch (error) {
+        vscode.window.showErrorMessage('Error connecting to Anthropic API.');
+        console.error(error);
+    }
+}
+
+
+async function GeminiFillHints(GeminiApiKey: string | undefined, fileContent: string) {
+    if (!GeminiApiKey) {
+        vscode.window.showErrorMessage('API key is required to use the extension.');
+        return;
+    }
+
+    const genAI = new GoogleGenerativeAI(GeminiApiKey);
+    vscode.window.showInformationMessage('Generating Dafny hints from the file content...');
+    const sysPrompt = prompts.SYS_DAFNY;
+    const userPrompt = prompts.GEN_HINTS_FROM_BODY + "\n\n" + fileContent;
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+
+    try {
+        const result = await model.generateContent([sysPrompt, userPrompt]);
+        return result.response.text();
     } catch (error) {
         vscode.window.showErrorMessage('Error connecting to Anthropic API.');
         console.error(error);
@@ -249,6 +273,33 @@ export async function askClaudeApiKey(): Promise<string> {
     }
 }
 
+
+export async function ensureGeminiApiKey(): Promise<string | undefined> {
+    let apiKey = vscode.workspace.getConfiguration().get<string>('google.apiKey');
+    if (!apiKey) {
+        apiKey = await askGeminiApiKey();
+    }
+    return apiKey;
+}
+
+
+export async function askGeminiApiKey(): Promise<string> {
+    let apiKey = await vscode.window.showInputBox({
+        prompt: 'Please enter your Google API key.',
+        ignoreFocusOut: true,
+        password: true,
+        placeHolder: 'Enter your Google API key',
+    });
+
+    if (apiKey) {
+        await vscode.workspace.getConfiguration().update('google.apiKey', apiKey, vscode.ConfigurationTarget.Global);
+        return apiKey;
+    } else {
+        throw new Error('API key is required to use the extension.');
+    }
+}
+
+
 export async function ensureNumIterations(): Promise<number | undefined> {
     let numIterations = vscode.workspace.getConfiguration('dafny-autopilot').get<number>('numIterations');
     if (!(numIterations && Number.isInteger(numIterations) && numIterations > 0)) {
@@ -312,6 +363,11 @@ export async function callLangChain(modelName: string, filePath: string, outputC
             apiKey = await ensureClaudeApiKey();
             if (apiKey) {
                 process.env.ANTHROPIC_API_KEY = apiKey;
+            }
+        } else if (modelName.startsWith('gemini')) {
+            apiKey = await ensureGeminiApiKey();
+            if (apiKey) {
+                process.env.GOOGLE_API_KEY = apiKey;
             }
         }
         if (!apiKey) {

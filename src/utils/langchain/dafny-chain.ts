@@ -1,10 +1,11 @@
 import * as fs from 'fs';
-import * as path from 'path';
 import * as vscode from 'vscode';
 import { PRECONDITION_PROMPT, POSTCONDITION_PROMPT, INVARIANT_PROMPT, FIX_PROMPT, FIX_SYNTAX_PROMPT } from '../prompts';
-// import { PRECONDITION_PROMPT, POSTCONDITION_PROMPT, INVARIANT_PROMPT, FIX_PROMPT } from '../old-prompts';
+import { PRECONDITION_PROMPT as PRECONDITION_PROMPT_OLD, POSTCONDITION_PROMPT as POSTCONDITION_PROMPT_OLD,
+    INVARIANT_PROMPT as INVARIANT_PROMPT_OLD, FIX_PROMPT as FIX_PROMPT_OLD } from '../old-prompts';
 
 import { runDafny, ensureDafnyPath } from '../dafny-helpers';
+
 
 export class DafnyChain {
     private llm: any;
@@ -44,6 +45,12 @@ export class DafnyChain {
                     }
                 }
              });
+        } else if (this.modelName.startsWith('gemini')) {
+            const { ChatGoogleGenerativeAI } = await import('@langchain/google-genai');
+            this.llm = new ChatGoogleGenerativeAI({
+                modelName: this.modelName,
+                maxOutputTokens: 8192,
+            });
         } else {
             throw new Error(`Unsupported model: ${this.modelName}`);
         }

@@ -218,72 +218,166 @@ If the Python code includes libraries or functions that have no direct equivalen
 Ensure that all translated code adheres to both the syntactic rules of Dafny and the functional expectations of the original Python logic.
 Be absolutely certain that you return a syntactically correct Dafny program with no additional language. Do not include the \`\`\`dafny prefix or \`\`\` suffix in your response.`;
 
-export const PRECONDITION_PROMPT = `LLM=DafnyFV_Expert
-Task:AnalyzeDafny→AddPreCond(PC)
-Steps:1)Cmnt≥1PC/fn 2)WeakestPC 3)PredicateTransformerSemantics 4)NoAddIfOK 5)TagNew+"//+LLM"EndLine 6)KeepLLMCmnts
-Out:Explanations+FixedDafny+WeakestPC^SameStruct Format:EXPLANATIONS:\n[BRIEF_LIST_REASONING]\n\nDAFNY_CODE:\n\`\`\`dafny\n[CODE]\n\`\`\` 
-PCRules:•TruePreComp •Weakest •AllReqs •InitState •NoUnnec •TagNew •NoChangeExistCodeBody
-Think:StepByStepList
-Goal:BestPCs∀funcs&methods
-IMPORTANT:ProvideDetailedExplanationsFirst^DoNotModifyUnmarkedCond^NoChangeExistCodeBody
-Expand:↑→FullPrompt^MaintainStructure^CodeBelow:
-{code}`;
-
-export const POSTCONDITION_PROMPT = `LLM=DafnyFV_Expert
-Task:AnalyzeDafny→AddPostCond(PC)
-Steps:1)Cmnt≥1PC/fn 2)StrongPC 3)PredicateTransformerSemantics 4)NoAddIfOK 5)New+"//+LLM"EndLine 6)KeepLLMCmnts;
-Out:Explanations+FixedDafny+StrongPC^SameStruct Format:EXPLANATIONS:\n[BRIEF_LIST_REASONING]\n\nDAFNY_CODE:\n\`\`\`dafny\n[CODE]\n\`\`\` 
-PCRules:•TruePostComp •MaxStrength •AllOutcomes •FinalState •NoWeak/Unnec •TagNew •NoChangeExistCodeBody
-Goal:BestPCs∀funcs&methods
-ThinkStepByStepList
-IMPORTANT:BrfNumberedListExplanationFirst^DoNotModifyUnmarkedCond^NoChangeExistCodeBody
-Expand:↑→FullPrompt^MaintainStructure
-{code}
-`;
-
-
-export const INVARIANT_PROMPT = `LLM=DafnyFV_Expert 
-Task:AnalyzeDafny→AddLoopInvariants(LI) 
-Steps:1)ID_Loops 2)∀Loop:a)Analyze b)Props c)Form≥1LI d)EnsureStrong e)NoUnnec; 3)TagNew+"//+LLM"EndLine 4)KeepLLMCmnts
-Out:BrfNumberedListExplanation+FixedDafny+LI^SameStruct Format:EXPLANATIONS:\n[BRIEF_LIST_REASONING]\n\nDAFNY_CODE:\n\`\`\`dafny\n[CODE]\n\`\`\`
-LIRules:•TrueBefore/During/After •LoopVarsRelate •IncludeBounds •ConsiderPostCond •TagNew •NoChangeExistCodeBody •NoUnnec 
-Think:StepByStepList
-Goal:DafnyVerifyLoops
-IMPORTANT:BrfNumberedListExplanation^DoNotModifyUntaggedCond^NoChangeExistCodeBody
-Expand:↑→FullPrompt^MaintainStructure^PreserveAllCmnts^CodeBelow: 
-{code}`;
-
-export const FIX_PROMPT = `LLM=DafnyFV_Expert 
-Task:AnalyzeDafny→FixVerifIssues(FVI) 
-Focus:CorrectVerificationAnnotations(Requires,Ensures,LoopInvariants,Decreases)
-Def:VerificationAnnotations=Requires+Ensures+LoopInvariants+Decreases
-Def:NonVerificationCode=AllCodeExceptVerificationAnnotations
-Rules:•PreCond=True_Before •PostCond=True_After •LoopInv=True_Before/During/After •Decreases→ProveTermination •NoChangeNonVerificationCode •Fix1Error
-Input:FailedDafny+VerifResults: {modified_code} 
-Issues: {issue} 
+export const PRECONDITION_PROMPT = `You are an expert in formal verification and Dafny programming.
+Your task is to analyze the following Dafny code and identify and add the necessary preconditions to ensure the correctness of the code.
 Steps:
-1)PlanFixesForErrors
-2)ImplementPlannedFixes
-3)TagNewAnnotations+"//+LLM"EndLine
-4)OnlyRemoveLLMTaggedAnnotations→Comment_Out
-5)EnsureNoSyntaxErrors
-8)ProvideFullCode
-Output:BriefListExplanation+EntireDafnyCodeWithFixes
-Constraints:
-BriefListReasoningStepByStep
-ProvideFullDafnyCodeIncludingUnchangedParts
-DoNotAlterNonVerificationCode
-DoNotChangeFunctionsOrMethods
-OnlyModifyUntaggedAnnotationsOrLLMTaggedOnes
-Goal:DafnyVerificationPass+PreserveOriginalFunctionality
-CRITICAL:BriefListExplainThenProvideFullCode+DoNotChangeNonVerificationCode
-OutFormat:
-EXPLANATION:
-[BRIEF_LIST_REASONING]
+1) Ensure that each function, method, lemma, and predicate has at least one precondition.
+2) Add the weakest possible preconditions that ensure the correctness of the code.
+3) Use the Predicate Transformer Semantics to determine the necessary preconditions.
+4) Do not add preconditions if the code is already correct.
+5) Tag the new preconditions with "//+LLM" at the end of the line.
+6) Retain all existing comments in the code.
+Output:
+1) Provide a brief bullet-point list of the reasoning behind each added precondition.
+2) Return the fixed Dafny code with the added preconditions.
+3) Ensure that the code structure remains the same.
+Format:
+- EXPLANATIONS:\n
+  [BRIEF_LIST_OF_ALL_REASONING]\n
+- DAFNY_CODE:\n
+    \`\`\`dafny\n
+    [CODE]\n
+    \`\`\`
+Rules:
+- True Preconditions
+- Weakest Preconditions
+- No Unnecessary Preconditions
+- Tag New Preconditions with "//+LLM"
+- Do Not Change Existing Code Body
+Think:
+- Step-by-step list of the reasoning behind each added precondition in bullet-point format.
+Goal:
+- Provide the best possible preconditions for all functions, methods, lemmas, and predicates.
+Important:
+- Provide a detailed explanation for each added precondition first.
+- Do not modify untagged annotations/conditions.
+- Do not change the existing code body.
+Code Below:
+{code}`;
 
-DAFNY_CODE:
-\`\`\`dafny
-[ENTIRE_MODIFIED_CODE]`;
+export const POSTCONDITION_PROMPT = `You are an expert in formal verification and Dafny programming.
+Your task is to analyze the following Dafny code and identify and add the necessary postconditions to ensure the correctness of the code.
+Steps:
+1) Ensure that each function, method, lemma, and predicate has at least one postcondition.
+2) Add the strongest possible postconditions that ensure the correctness of the code.
+3) Use the Predicate Transformer Semantics to determine the necessary postconditions.
+4) Do not add postconditions if the code is already correct.
+5) Tag the new postconditions with "//+LLM" at the end of the line.
+6) Retain all existing comments in the code.
+Output:
+1) Provide a brief bullet-point list of the reasoning behind each added postcondition.
+2) Return the fixed Dafny code with the added postconditions.
+3) Ensure that the code structure remains the same.
+Format:
+- EXPLANATIONS:\n
+  [BRIEF_LIST_OF_ALL_REASONING]\n
+  - DAFNY_CODE:\n
+    \`\`\`dafny\n
+    [CODE]\n
+    \`\`\`
+Rules:
+- True Postconditions
+- Strongest Postconditions
+- Consider all outcomes of code execution
+- No weak or unnecessary postconditions
+- Tag New Postconditions with "//+LLM"
+- Do Not Change Existing Code Body
+Think:
+- Step-by-step list of the reasoning behind each added postcondition in bullet-point format.
+Goal:
+- Provide the best possible postconditions for all functions, methods, lemmas, and predicates.
+Important:
+- Provide a detailed explanation for each added postcondition first.
+- Do not modify untagged annotations/conditions.
+- Do not change the existing code body.
+Code Below:
+{code}`;
+
+
+export const INVARIANT_PROMPT = `You are an expert in formal verification and Dafny programming.
+Your task is to analyze the following Dafny code and identify and add the necessary loop invariants to ensure the correctness of the code.
+Steps:
+1) Identify all loops in the code.
+2) For each loop, analyze the loop's properties and behavior.
+3) Formulate at least one loop invariant for each loop that ensures the correctness of the loop.
+4) Ensure that the loop invariant is strong enough to prove the correctness of the loop.
+5) Do not add loop invariants if the code is already correct.
+6) Tag the new loop invariants with "//+LLM" at the end of the line.
+7) Retain all existing comments in the code.
+Output:
+1) Provide a brief bullet-point list of the reasoning behind each added loop invariant.
+2) Provide the fixed Dafny code with the added loop invariants.
+3) Ensure that the code structure remains the same.
+Format:
+- EXPLANATIONS:\n
+  [BRIEF_LIST_OF_ALL_REASONING]\n
+- DAFNY_CODE:\n
+    \`\`\`dafny\n
+    [CODE]\n
+    \`\`\`
+Rules:
+- Loop Invariants are True Before, During, and After loop execution.
+- Loop Variables must relate to the loop's properties.
+- Include Bounds in the loop invariant.
+- Consider the Postcondition in the loop invariant.
+- Tag New Loop Invariants with "//+LLM"
+- Do Not Change Existing Code Body
+- No Unnecessary Loop Invariants
+Think:
+- Step-by-step list of the reasoning behind each added loop invariant in bullet-point format.
+Goal:
+- Ensure the correctness of all loops in the code.
+Important:
+- Provide a detailed explanation for each added loop invariant first.
+- Do not modify untagged annotations/conditions.
+- Do not change the existing code body.
+Code Below:
+{code}`;
+
+export const FIX_PROMPT = `You are an expert in formal verification and Dafny programming.
+Your task is to analyze the following Dafny code and identify and correct any verification issues present in the code.
+Focus on correcting verification annotations such as Requires, Ensures, Loop Invariants, and Decreases clauses to ensure the correctness of the code.
+Rules:
+- Ensure that all Requires clauses are true before the function or method is executed.
+- Ensure that all Ensures clauses are true after the function or method is executed.
+- Ensure that all Loop Invariants are true before, during, and after the loop execution.
+- Prove the termination of all loops using the Decreases clause.
+- Do not change any non-verification code (e.g., function bodies, method implementations).
+- Focus on one error at a time.
+Input:
+- Failed Dafny code with verification issues.
+- Output from running the Dafny verifier on the code.
+Code: {modified_code}
+Issues: {issue}
+Steps:
+1) Plan the fixes for each verification issue.
+2) Implement the planned fixes.
+3) Tag the new annotations with "//+LLM" at the end of the line.
+4) You may remove any LLM-tagged annotations that are no longer necessary.
+5) Ensure that there are no syntax errors in the code.
+6) Provide the full Dafny code with the fixes.
+Output:
+- Brief list of the reasoning behind each fix.
+- Entire Dafny code with the fixes.
+Constraints:
+- Provide a brief list of the reasoning behind each fix.
+- Provide the full Dafny code, including unchanged parts.
+- Do not alter non-verification code.
+- Do not change functions or methods.
+- Only modify untagged annotations if they have errors or LLM-tagged ones.
+Goal:
+- Ensure that the Dafny code passes verification.
+Critical:
+- Provide a brief list of the reasoning behind each fix.
+- Do not change non-verification code.
+Output Format:
+- EXPLANATION:
+  [BRIEF_LIST_REASONING]
+- DAFNY_CODE:
+    \`\`\`dafny
+    [ENTIRE_MODIFIED_CODE]
+    \`\`\`
+`;
 
 export const FIX_PROMPT2 = `
 LLM=DafnyFV_Expert 

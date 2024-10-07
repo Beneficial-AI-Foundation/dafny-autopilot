@@ -300,31 +300,75 @@ export async function askGeminiApiKey(): Promise<string> {
     }
 }
 
-// ensureAWSApiKey
-export async function ensureAWSApiKey(): Promise<string | undefined> {
-    let apiKey = vscode.workspace.getConfiguration().get<string>('aws.apiKey');
-    if (!apiKey) {
-        apiKey = await askAWSApiKey();
+// Ensure AWS Access Key ID
+export async function ensureAWSAccessKeyId(): Promise<string | undefined> {
+    let accessKeyId = vscode.workspace.getConfiguration().get<string>('aws.accessKeyId');
+    if (!accessKeyId) {
+        accessKeyId = await askAWSAccessKeyId();
     }
-    return apiKey;
+    return accessKeyId;
 }
 
-
-// askAWSApiKey
-export async function askAWSApiKey(): Promise<string> {
-    let apiKey = await vscode.window.showInputBox({
-        prompt: 'Please enter your AWS API key.',
+// Ask for AWS Access Key ID
+export async function askAWSAccessKeyId(): Promise<string> {
+    let accessKeyId = await vscode.window.showInputBox({
+        prompt: 'Please enter your AWS Access Key ID.',
         ignoreFocusOut: true,
         password: true,
-        placeHolder: 'Enter your AWS API key',
+        placeHolder: 'Enter your AWS Access Key ID',
     });
 
-    if (apiKey) {
-        await vscode.workspace.getConfiguration().update('aws.apiKey', apiKey, vscode.ConfigurationTarget.Global);
-        return apiKey;
+    if (accessKeyId) {
+        await vscode.workspace.getConfiguration().update('aws.accessKeyId', accessKeyId, vscode.ConfigurationTarget.Global);
+        return accessKeyId;
     } else {
-        throw new Error('API key is required to use the extension.');
+        throw new Error('AWS Access Key ID is required to use the extension.');
     }
+}
+
+// Ensure AWS Secret Access Key
+export async function ensureAWSSecretAccessKey(): Promise<string | undefined> {
+    let secretAccessKey = vscode.workspace.getConfiguration().get<string>('aws.secretAccessKey');
+    if (!secretAccessKey) {
+        secretAccessKey = await askAWSSecretAccessKey();
+    }
+    return secretAccessKey;
+}
+
+// Ask for AWS Secret Access Key
+export async function askAWSSecretAccessKey(): Promise<string> {
+    let secretAccessKey = await vscode.window.showInputBox({
+        prompt: 'Please enter your AWS Secret Access Key.',
+        ignoreFocusOut: true,
+        password: true,
+        placeHolder: 'Enter your AWS Secret Access Key',
+    });
+
+    if (secretAccessKey) {
+        await vscode.workspace.getConfiguration().update('aws.secretAccessKey', secretAccessKey, vscode.ConfigurationTarget.Global);
+        return secretAccessKey;
+    } else {
+        throw new Error('AWS Secret Access Key is required to use the extension.');
+    }
+}
+
+// Ensure both AWS credentials are set
+export async function ensureAWSCredentials(): Promise<{ accessKeyId: string; secretAccessKey: string }> {
+    let accessKeyId = await ensureAWSAccessKeyId();
+    let secretAccessKey = await ensureAWSSecretAccessKey();
+
+    while (!accessKeyId || !secretAccessKey) {
+        if (!accessKeyId) {
+            vscode.window.showWarningMessage('AWS Access Key ID is missing. Please enter it.');
+            accessKeyId = await askAWSAccessKeyId();
+        }
+        if (!secretAccessKey) {
+            vscode.window.showWarningMessage('AWS Secret Access Key is missing. Please enter it.');
+            secretAccessKey = await askAWSSecretAccessKey();
+        }
+    }
+
+    return { accessKeyId, secretAccessKey };
 }
 
 
@@ -398,9 +442,10 @@ export async function callLangChain(modelName: string, filePath: string, outputC
                 process.env.GOOGLE_API_KEY = apiKey;
             }
         } else if (modelName.startsWith('anthropic.')) {
-            apiKey = await ensureAWSApiKey();
-            if (apiKey) {
-                process.env.AWS_API_KEY = apiKey;
+            const {accessKeyId, secretAccessKey } = await ensureAWSCredentials();
+            if (accessKeyId && secretAccessKey) {
+                process.env.BEDROCK_AWS_ACCESS_KEY_ID = accessKeyId;
+                process.env.BEDROCK_AWS_SECRET_ACCESS_KEY = secretAccessKey;
             }
         }
         if (!apiKey) {

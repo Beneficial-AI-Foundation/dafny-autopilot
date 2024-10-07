@@ -14,7 +14,7 @@ Dafny Autopilot is an AI tool leveraging GPT-4o / Claude 3.5 Sonnet to verify th
 
 1. Install Dafny on your machine by following [this tutorial](https://dafny.org/dafny/Installation).
 2. You may need to install `Z3` and `dotnet` as well.
-3. `node v21` is recommended.
+3. `node v20` is recommended.
 4. To use GPT models, you'll need an OpenAI API key. To use Claude models, you'll need an Anthropic API key (which you'll be prompted to input when you start using Dafny Autopilot).
 5. <i>(Optional)</i> Install [the Dafny for Visual Studio Code extension](https://marketplace.visualstudio.com/items?itemName=dafny-lang.ide-vscode) (for better syntax & error highlighting).
 <br>

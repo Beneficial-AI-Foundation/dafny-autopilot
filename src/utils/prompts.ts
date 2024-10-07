@@ -242,7 +242,7 @@ Rules:
 - True Preconditions
 - Weakest Preconditions
 - No Unnecessary Preconditions
-- Tag New Preconditions with "//+LLM"
+- Tag Added Preconditions with "//+LLM" at the end of the line
 - Do Not Change Existing Code Body
 Think:
 - Step-by-step list of the reasoning behind each added precondition in bullet-point format.
@@ -262,7 +262,7 @@ Steps:
 2) Add the strongest possible postconditions that ensure the correctness of the code.
 3) Use the Predicate Transformer Semantics to determine the necessary postconditions.
 4) Do not add postconditions if the code is already correct.
-5) Tag the new postconditions with "//+LLM" at the end of the line.
+5) Tag the postconditions you add with "//+LLM" at the end of the line.
 6) Retain all existing comments in the code.
 Output:
 1) Provide a brief bullet-point list of the reasoning behind each added postcondition.
@@ -302,7 +302,7 @@ Steps:
 3) Formulate at least one loop invariant for each loop that ensures the correctness of the loop.
 4) Ensure that the loop invariant is strong enough to prove the correctness of the loop.
 5) Do not add loop invariants if the code is already correct.
-6) Tag the new loop invariants with "//+LLM" at the end of the line.
+6) Tag the loop invariants you add with "//+LLM" at the end of the line.
 7) Retain all existing comments in the code.
 Output:
 1) Provide a brief bullet-point list of the reasoning behind each added loop invariant.
@@ -320,7 +320,7 @@ Rules:
 - Loop Variables must relate to the loop's properties.
 - Include Bounds in the loop invariant.
 - Consider the Postcondition in the loop invariant.
-- Tag New Loop Invariants with "//+LLM"
+- Tag Added Loop Invariants with "//+LLM"
 - Do Not Change Existing Code Body
 - No Unnecessary Loop Invariants
 Think:

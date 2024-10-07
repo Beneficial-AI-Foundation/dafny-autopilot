@@ -49,6 +49,9 @@ export class DafnyChain {
                 modelName: this.modelName,
                 maxOutputTokens: 8192,
             });
+        } else if (this.modelName.startsWith('anthropic.')) {
+            const { ChatBedrockConverse } = await import('@langchain/aws');
+            this.llm = new ChatBedrockConverse({ model: this.modelName, temperature: 0.1 });
         } else {
             throw new Error(`Unsupported model: ${this.modelName}`);
         }

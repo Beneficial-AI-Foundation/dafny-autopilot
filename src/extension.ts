@@ -72,6 +72,15 @@ export function activate(context: vscode.ExtensionContext) {
             callLangChain('gemini-1.5-pro', filePath, outputChannel);
         }),
 
+        vscode.commands.registerCommand('dafny-autopilot.AWSLangchain', async (uri: vscode.Uri) => {
+            if (!uri) {
+                vscode.window.showErrorMessage('This command must be invoked from a file context.');
+                return;
+            }
+            const filePath = uri.fsPath;
+            callLangChain('anthropic.claude-3-5-sonnet-20240620-v1:0', filePath, outputChannel);
+        }),
+
         vscode.commands.registerCommand('dafny-autopilot.GPTTranslatePython', async (uri: vscode.Uri) => {
             if (!uri) {
                 vscode.window.showErrorMessage('This command must be invoked from a Python file context.');

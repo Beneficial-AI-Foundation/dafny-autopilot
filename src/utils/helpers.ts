@@ -325,6 +325,7 @@ export async function askAWSApiKey(): Promise<string> {
     } else {
         throw new Error('API key is required to use the extension.');
     }
+}
 
 
 export async function ensureNumIterations(): Promise<number | undefined> {
@@ -395,6 +396,11 @@ export async function callLangChain(modelName: string, filePath: string, outputC
             apiKey = await ensureGeminiApiKey();
             if (apiKey) {
                 process.env.GOOGLE_API_KEY = apiKey;
+            }
+        } else if (modelName.startsWith('anthropic.')) {
+            apiKey = await ensureAWSApiKey();
+            if (apiKey) {
+                process.env.AWS_API_KEY = apiKey;
             }
         }
         if (!apiKey) {

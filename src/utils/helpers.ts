@@ -4,6 +4,7 @@ import * as path from 'path';
 import * as process from 'process';
 import OpenAI from 'openai';
 import Anthropic from '@anthropic-ai/sdk';
+import { ChatBedrockConverse } from '@langchain/aws';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import * as prompts from './prompts';
 import { DafnyChain } from './langchain/dafny-chain';
@@ -298,6 +299,32 @@ export async function askGeminiApiKey(): Promise<string> {
         throw new Error('API key is required to use the extension.');
     }
 }
+
+// ensureAWSApiKey
+export async function ensureAWSApiKey(): Promise<string | undefined> {
+    let apiKey = vscode.workspace.getConfiguration().get<string>('aws.apiKey');
+    if (!apiKey) {
+        apiKey = await askAWSApiKey();
+    }
+    return apiKey;
+}
+
+
+// askAWSApiKey
+export async function askAWSApiKey(): Promise<string> {
+    let apiKey = await vscode.window.showInputBox({
+        prompt: 'Please enter your AWS API key.',
+        ignoreFocusOut: true,
+        password: true,
+        placeHolder: 'Enter your AWS API key',
+    });
+
+    if (apiKey) {
+        await vscode.workspace.getConfiguration().update('aws.apiKey', apiKey, vscode.ConfigurationTarget.Global);
+        return apiKey;
+    } else {
+        throw new Error('API key is required to use the extension.');
+    }
 
 
 export async function ensureNumIterations(): Promise<number | undefined> {

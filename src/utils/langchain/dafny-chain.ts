@@ -60,6 +60,7 @@ export class DafnyChain {
                 model: this.modelName, 
                 temperature: 0.1,
                 region: 'us-east-1',
+                maxTokens: 4096,
                 credentials: {
                     accessKeyId: accessKeyId,
                     secretAccessKey: secretAccessKey

@@ -443,6 +443,7 @@ export async function callLangChain(modelName: string, filePath: string, outputC
             }
         } else if (modelName.startsWith('anthropic.')) {
             const {accessKeyId, secretAccessKey } = await ensureAWSCredentials();
+            apiKey = accessKeyId + ':' + secretAccessKey;
             if (accessKeyId && secretAccessKey) {
                 process.env.BEDROCK_AWS_ACCESS_KEY_ID = accessKeyId;
                 process.env.BEDROCK_AWS_SECRET_ACCESS_KEY = secretAccessKey;

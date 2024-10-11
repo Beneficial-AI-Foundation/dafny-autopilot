@@ -39,6 +39,10 @@
         "title": "Dafny Autopilot: Fill in Dafny Annotations (Gemini 1.5 Pro)"
       },
       {
+        "command": "dafny-autopilot.AWSLangchain",
+        "title": "Dafny Autopilot: Fill in Dafny Annotations (AWS Bedrock)"
+      },
+      {
         "command": "dafny-autopilot.explainDafnyAnnotationGPT",
         "title": "Dafny Autopilot: Explain Dafny Annotation (GPT-4o)"
       },
@@ -61,6 +65,11 @@
         },
         {
           "command": "dafny-autopilot.GeminiLangchain",
+          "group": "navigation",
+          "when": "resourceLangId == dafny"
+        },
+        {
+          "command": "dafny-autopilot.AWSLangchain",
           "group": "navigation",
           "when": "resourceLangId == dafny"
         },
@@ -102,6 +111,11 @@
           "when": "resourceLangId == dafny"
         },
         {
+          "command": "dafny-autopilot.AWSLangchain",
+          "group": "navigation",
+          "when": "resourceLangId == dafny"
+        },
+        {
           "command": "dafny-autopilot.GPTTranslatePython",
           "group": "navigation",
           "when": "resourceLangId == python && config.dafny-autopilot.enableDevelopmentFeatures"
@@ -131,6 +145,16 @@
           "type": "string",
           "default": "",
           "description": "API key for accessing Google services"
+        },
+        "aws.secretAccessKey": {
+          "type": "string",
+          "default": "",
+          "description": "Secret access key for accessing AWS services"
+        },
+        "aws.accessKeyId": {
+          "type": "string",
+          "default": "",
+          "description": "Access key ID for accessing AWS services"
         },
         "dafny-autopilot.dafnyPath": {
           "type": "string",

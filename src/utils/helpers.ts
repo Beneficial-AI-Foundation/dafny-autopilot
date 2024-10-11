@@ -496,6 +496,9 @@ export async function explainDafnyAnnotation(model: string, selectedText: string
         apiKey = await ensureGPTApiKey();
     } else if (model.startsWith('claude')) {
         apiKey = await ensureClaudeApiKey();
+    } else if (model.startsWith('anthropic.')) {
+        const { accessKeyId, secretAccessKey } = await ensureAWSCredentials();
+        apiKey = accessKeyId + ':' + secretAccessKey;
     } else {
         vscode.window.showErrorMessage('Invalid model name.');
         return;
@@ -513,9 +516,11 @@ export async function explainDafnyAnnotation(model: string, selectedText: string
         let explanation: string | undefined;
 
         if (model.startsWith('gpt')) {
-            explanation = await explainUsingGPT(apiKey, sysPrompt, userPrompt);
+            explanation = await explainUsingGPT(apiKey, sysPrompt, userPrompt, model);
         } else if (model.startsWith('claude')) {
-            explanation = await explainUsingClaude(apiKey, sysPrompt, userPrompt);
+            explanation = await explainUsingClaude(apiKey, sysPrompt, userPrompt, model);
+        } else if (model.startsWith('anthropic.')) {
+            explanation = await explainUsingAWSBedrock(apiKey, sysPrompt, userPrompt, model);
         }
 
         if (explanation) {
@@ -531,10 +536,10 @@ export async function explainDafnyAnnotation(model: string, selectedText: string
     }
 }
 
-async function explainUsingGPT(apiKey: string, sysPrompt: string, userPrompt: string): Promise<string | undefined> {
+async function explainUsingGPT(apiKey: string, sysPrompt: string, userPrompt: string, model: string): Promise<string | undefined> {
     const openai = new OpenAI({ apiKey });
     const response = await openai.chat.completions.create({
-        model: 'gpt-4o',
+        model: model,
         messages: [
             { "role": "system", "content": sysPrompt },
             { "role": "user", "content": userPrompt }
@@ -543,10 +548,10 @@ async function explainUsingGPT(apiKey: string, sysPrompt: string, userPrompt: st
     return response.choices[0].message.content ?? undefined;
 }
 
-async function explainUsingClaude(apiKey: string, sysPrompt: string, userPrompt: string): Promise<string | undefined> {
+async function explainUsingClaude(apiKey: string, sysPrompt: string, userPrompt: string, model: string): Promise<string | undefined> {
     const anthropic = new Anthropic({ apiKey });
     const response = await anthropic.messages.create({
-        model: "claude-3-5-sonnet-20240620",
+        model: model,
         max_tokens: 4096,
         system: sysPrompt,
         messages: [
@@ -554,4 +559,17 @@ async function explainUsingClaude(apiKey: string, sysPrompt: string, userPrompt:
         ]
     });
     return (response.content[0] as Anthropic.TextBlock).text;
+}
+
+async function explainUsingAWSBedrock(apiKey: string, sysPrompt: string, userPrompt: string, model: string): Promise<string | undefined> {
+    const accessKeyId = apiKey.split(':')[0];
+    const secretAccessKey = apiKey.split(':')[1];
+    const bedrock = new ChatBedrockConverse({ 
+        credentials: { accessKeyId, secretAccessKey },
+        region: 'us-east-1',
+        model: model,
+        maxTokens: 4096
+    });
+    const response = await bedrock.invoke(userPrompt);
+    return (response.content as string);
 }

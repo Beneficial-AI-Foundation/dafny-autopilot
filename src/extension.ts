@@ -128,6 +128,22 @@ export function activate(context: vscode.ExtensionContext) {
             }
             explainDafnyAnnotation('claude-3-5-sonnet-20240620', selectedText, outputChannel);
         }),
+
+        vscode.commands.registerCommand('dafny-autopilot.explainDafnyAnnotationAWSBedrock', async () => {
+            const editor = vscode.window.activeTextEditor;
+            if (!editor) {
+                vscode.window.showErrorMessage('No active editor.');
+                return;
+            }
+            const selection = editor.selection;
+            const selectedText = editor.document.getText(selection);
+            if (!selectedText) {
+                vscode.window.showErrorMessage('No text selected.');
+                return;
+            }
+            explainDafnyAnnotation('anthropic.claude-3-5-sonnet-20240620-v1:0', selectedText, outputChannel);
+        }),
+
         vscode.commands.registerCommand('dafny-autopilot.toggleDevFeatures', () => {
             const currentValue = config.get('enableDevelopmentFeatures');
             config.update('enableDevelopmentFeatures', !currentValue, vscode.ConfigurationTarget.Workspace);

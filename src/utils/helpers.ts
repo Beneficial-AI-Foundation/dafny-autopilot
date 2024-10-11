@@ -4,6 +4,7 @@ import * as path from 'path';
 import * as process from 'process';
 import OpenAI from 'openai';
 import Anthropic from '@anthropic-ai/sdk';
+import { ChatBedrockConverse } from '@langchain/aws';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import * as prompts from './prompts';
 import { DafnyChain } from './langchain/dafny-chain';
@@ -299,6 +300,77 @@ export async function askGeminiApiKey(): Promise<string> {
     }
 }
 
+// Ensure AWS Access Key ID
+export async function ensureAWSAccessKeyId(): Promise<string | undefined> {
+    let accessKeyId = vscode.workspace.getConfiguration().get<string>('aws.accessKeyId');
+    if (!accessKeyId) {
+        accessKeyId = await askAWSAccessKeyId();
+    }
+    return accessKeyId;
+}
+
+// Ask for AWS Access Key ID
+export async function askAWSAccessKeyId(): Promise<string> {
+    let accessKeyId = await vscode.window.showInputBox({
+        prompt: 'Please enter your AWS Access Key ID.',
+        ignoreFocusOut: true,
+        password: true,
+        placeHolder: 'Enter your AWS Access Key ID',
+    });
+
+    if (accessKeyId) {
+        await vscode.workspace.getConfiguration().update('aws.accessKeyId', accessKeyId, vscode.ConfigurationTarget.Global);
+        return accessKeyId;
+    } else {
+        throw new Error('AWS Access Key ID is required to use the extension.');
+    }
+}
+
+// Ensure AWS Secret Access Key
+export async function ensureAWSSecretAccessKey(): Promise<string | undefined> {
+    let secretAccessKey = vscode.workspace.getConfiguration().get<string>('aws.secretAccessKey');
+    if (!secretAccessKey) {
+        secretAccessKey = await askAWSSecretAccessKey();
+    }
+    return secretAccessKey;
+}
+
+// Ask for AWS Secret Access Key
+export async function askAWSSecretAccessKey(): Promise<string> {
+    let secretAccessKey = await vscode.window.showInputBox({
+        prompt: 'Please enter your AWS Secret Access Key.',
+        ignoreFocusOut: true,
+        password: true,
+        placeHolder: 'Enter your AWS Secret Access Key',
+    });
+
+    if (secretAccessKey) {
+        await vscode.workspace.getConfiguration().update('aws.secretAccessKey', secretAccessKey, vscode.ConfigurationTarget.Global);
+        return secretAccessKey;
+    } else {
+        throw new Error('AWS Secret Access Key is required to use the extension.');
+    }
+}
+
+// Ensure both AWS credentials are set
+export async function ensureAWSCredentials(): Promise<{ accessKeyId: string; secretAccessKey: string }> {
+    let accessKeyId = await ensureAWSAccessKeyId();
+    let secretAccessKey = await ensureAWSSecretAccessKey();
+
+    while (!accessKeyId || !secretAccessKey) {
+        if (!accessKeyId) {
+            vscode.window.showWarningMessage('AWS Access Key ID is missing. Please enter it.');
+            accessKeyId = await askAWSAccessKeyId();
+        }
+        if (!secretAccessKey) {
+            vscode.window.showWarningMessage('AWS Secret Access Key is missing. Please enter it.');
+            secretAccessKey = await askAWSSecretAccessKey();
+        }
+    }
+
+    return { accessKeyId, secretAccessKey };
+}
+
 
 export async function ensureNumIterations(): Promise<number | undefined> {
     let numIterations = vscode.workspace.getConfiguration('dafny-autopilot').get<number>('numIterations');
@@ -369,6 +441,13 @@ export async function callLangChain(modelName: string, filePath: string, outputC
             if (apiKey) {
                 process.env.GOOGLE_API_KEY = apiKey;
             }
+        } else if (modelName.startsWith('anthropic.')) {
+            const {accessKeyId, secretAccessKey } = await ensureAWSCredentials();
+            apiKey = accessKeyId + ':' + secretAccessKey;
+            if (accessKeyId && secretAccessKey) {
+                process.env.BEDROCK_AWS_ACCESS_KEY_ID = accessKeyId;
+                process.env.BEDROCK_AWS_SECRET_ACCESS_KEY = secretAccessKey;
+            }
         }
         if (!apiKey) {
             throw new Error('API key not found or invalid');
@@ -417,6 +496,9 @@ export async function explainDafnyAnnotation(model: string, selectedText: string
         apiKey = await ensureGPTApiKey();
     } else if (model.startsWith('claude')) {
         apiKey = await ensureClaudeApiKey();
+    } else if (model.startsWith('anthropic.')) {
+        const { accessKeyId, secretAccessKey } = await ensureAWSCredentials();
+        apiKey = accessKeyId + ':' + secretAccessKey;
     } else {
         vscode.window.showErrorMessage('Invalid model name.');
         return;
@@ -434,9 +516,11 @@ export async function explainDafnyAnnotation(model: string, selectedText: string
         let explanation: string | undefined;
 
         if (model.startsWith('gpt')) {
-            explanation = await explainUsingGPT(apiKey, sysPrompt, userPrompt);
+            explanation = await explainUsingGPT(apiKey, sysPrompt, userPrompt, model);
         } else if (model.startsWith('claude')) {
-            explanation = await explainUsingClaude(apiKey, sysPrompt, userPrompt);
+            explanation = await explainUsingClaude(apiKey, sysPrompt, userPrompt, model);
+        } else if (model.startsWith('anthropic.')) {
+            explanation = await explainUsingAWSBedrock(apiKey, sysPrompt, userPrompt, model);
         }
 
         if (explanation) {
@@ -452,10 +536,10 @@ export async function explainDafnyAnnotation(model: string, selectedText: string
     }
 }
 
-async function explainUsingGPT(apiKey: string, sysPrompt: string, userPrompt: string): Promise<string | undefined> {
+async function explainUsingGPT(apiKey: string, sysPrompt: string, userPrompt: string, model: string): Promise<string | undefined> {
     const openai = new OpenAI({ apiKey });
     const response = await openai.chat.completions.create({
-        model: 'gpt-4o',
+        model: model,
         messages: [
             { "role": "system", "content": sysPrompt },
             { "role": "user", "content": userPrompt }
@@ -464,10 +548,10 @@ async function explainUsingGPT(apiKey: string, sysPrompt: string, userPrompt: st
     return response.choices[0].message.content ?? undefined;
 }
 
-async function explainUsingClaude(apiKey: string, sysPrompt: string, userPrompt: string): Promise<string | undefined> {
+async function explainUsingClaude(apiKey: string, sysPrompt: string, userPrompt: string, model: string): Promise<string | undefined> {
     const anthropic = new Anthropic({ apiKey });
     const response = await anthropic.messages.create({
-        model: "claude-3-5-sonnet-20240620",
+        model: model,
         max_tokens: 4096,
         system: sysPrompt,
         messages: [
@@ -475,4 +559,17 @@ async function explainUsingClaude(apiKey: string, sysPrompt: string, userPrompt:
         ]
     });
     return (response.content[0] as Anthropic.TextBlock).text;
+}
+
+async function explainUsingAWSBedrock(apiKey: string, sysPrompt: string, userPrompt: string, model: string): Promise<string | undefined> {
+    const accessKeyId = apiKey.split(':')[0];
+    const secretAccessKey = apiKey.split(':')[1];
+    const bedrock = new ChatBedrockConverse({ 
+        credentials: { accessKeyId, secretAccessKey },
+        region: 'us-east-1',
+        model: model,
+        maxTokens: 4096
+    });
+    const response = await bedrock.invoke(userPrompt);
+    return (response.content as string);
 }

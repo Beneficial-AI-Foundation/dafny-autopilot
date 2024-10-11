@@ -49,6 +49,22 @@ export class DafnyChain {
                 modelName: this.modelName,
                 maxOutputTokens: 8192,
             });
+        } else if (this.modelName.startsWith('anthropic.')) {
+            const { ChatBedrockConverse } = await import('@langchain/aws');
+            const accessKeyId = process.env.BEDROCK_AWS_ACCESS_KEY_ID;
+            const secretAccessKey = process.env.BEDROCK_AWS_SECRET_ACCESS_KEY;
+            if (!accessKeyId || !secretAccessKey) {
+                throw new Error('AWS credentials not found in environment variables.');
+            }
+            this.llm = new ChatBedrockConverse({ 
+                model: this.modelName, 
+                temperature: 0.1,
+                region: 'us-east-1',
+                maxTokens: 4096,
+                credentials: {
+                    accessKeyId: accessKeyId,
+                    secretAccessKey: secretAccessKey
+                }});
         } else {
             throw new Error(`Unsupported model: ${this.modelName}`);
         }

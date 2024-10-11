@@ -4,7 +4,7 @@
   "publisher": "BeneficialAIFoundation",
   "description": "LLM-based Dafny Autopilot extension for Visual Studio Code",
   "repository": "https://github.com/Beneficial-AI-Foundation/dafny-autopilot",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "engines": {
     "vscode": "^1.90.0"
   },
@@ -39,12 +39,20 @@
         "title": "Dafny Autopilot: Fill in Dafny Annotations (Gemini 1.5 Pro)"
       },
       {
+        "command": "dafny-autopilot.AWSLangchain",
+        "title": "Dafny Autopilot: Fill in Dafny Annotations (AWS Bedrock)"
+      },
+      {
         "command": "dafny-autopilot.explainDafnyAnnotationGPT",
         "title": "Dafny Autopilot: Explain Dafny Annotation (GPT-4o)"
       },
       {
         "command": "dafny-autopilot.explainDafnyAnnotationClaude",
         "title": "Dafny Autopilot: Explain Dafny Annotation (Claude 3.5)"
+      },
+      {
+        "command": "dafny-autopilot.explainDafnyAnnotationAWSBedrock",
+        "title": "Dafny Autopilot: Explain Dafny Annotation (AWS Bedrock)"
       }
     ],
     "menus": {
@@ -61,6 +69,11 @@
         },
         {
           "command": "dafny-autopilot.GeminiLangchain",
+          "group": "navigation",
+          "when": "resourceLangId == dafny"
+        },
+        {
+          "command": "dafny-autopilot.AWSLangchain",
           "group": "navigation",
           "when": "resourceLangId == dafny"
         },
@@ -83,7 +96,12 @@
           "command": "dafny-autopilot.explainDafnyAnnotationClaude",
           "group": "navigation",
           "when": "resourceLangId == dafny && editorHasSelection"
-        }   
+        },
+        {
+          "command": "dafny-autopilot.explainDafnyAnnotationAWSBedrock",
+          "group": "navigation",
+          "when": "resourceLangId == dafny && editorHasSelection"
+        }
       ],
       "explorer/context": [
         {
@@ -98,6 +116,11 @@
         },
         {
           "command": "dafny-autopilot.GeminiLangchain",
+          "group": "navigation",
+          "when": "resourceLangId == dafny"
+        },
+        {
+          "command": "dafny-autopilot.AWSLangchain",
           "group": "navigation",
           "when": "resourceLangId == dafny"
         },
@@ -131,6 +154,16 @@
           "type": "string",
           "default": "",
           "description": "API key for accessing Google services"
+        },
+        "aws.secretAccessKey": {
+          "type": "string",
+          "default": "",
+          "description": "Secret access key for accessing AWS services"
+        },
+        "aws.accessKeyId": {
+          "type": "string",
+          "default": "",
+          "description": "Access key ID for accessing AWS services"
         },
         "dafny-autopilot.dafnyPath": {
           "type": "string",
@@ -186,9 +219,10 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.24.3",
     "@google/generative-ai": "^0.17.1",
+    "@langchain/aws": "^0.1.0",
     "@langchain/anthropic": "^0.2.11",
     "@langchain/community": "^0.2.19",
-    "@langchain/core": "^0.1.5",
+    "@langchain/core": "^0.2.21",
     "@langchain/google-genai": "^0.0.26",
     "@vscode/vsce": "^3.1.0",
     "child_process": "^1.0.2",

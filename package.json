@@ -4,7 +4,7 @@
   "publisher": "BeneficialAIFoundation",
   "description": "LLM-based Dafny Autopilot extension for Visual Studio Code",
   "repository": "https://github.com/Beneficial-AI-Foundation/dafny-autopilot",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "engines": {
     "vscode": "^1.90.0"
   },
@@ -101,7 +101,7 @@
           "command": "dafny-autopilot.explainDafnyAnnotationAWSBedrock",
           "group": "navigation",
           "when": "resourceLangId == dafny && editorHasSelection"
-        } 
+        }
       ],
       "explorer/context": [
         {

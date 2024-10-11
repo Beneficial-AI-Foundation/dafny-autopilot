@@ -67,7 +67,7 @@ suite('Extension Test Suite', () => {
 
 
 	test('Extension should be present', () => {
-        assert.ok(vscode.extensions.getExtension('DafnyAutopilot.dafny-autopilot'));
+        assert.ok(vscode.extensions.getExtension('BeneficialAIFoundation.dafny-autopilot'));
     });
 
 

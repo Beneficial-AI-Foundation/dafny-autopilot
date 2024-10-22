@@ -1,12 +1,13 @@
 # Dafny Autopilot for VS Code
 
-Dafny Autopilot is an AI tool leveraging GPT-4o / Claude 3.5 Sonnet to verify that the code your Copilot writes is correct.
+Dafny Autopilot is an AI tool leveraging GPT-4o / Claude 3.5 Sonnet / Gemini 1.5 Pro / AWS Bedrock to help verify your Dafny code.
 <br>
 
 
 ## Features 🎯
 
 * Given an incomplete Dafny `.dfy` program with missing verification annotations, Dafny Autopilot uses LLM to fill in the annotations & automatically verify the resulting Dafny program.
+* Highlight an annotation line (like a precondition, or an invariant) to get an English explanation
 <br>
 
 
@@ -42,6 +43,8 @@ Dafny Autopilot is an AI tool leveraging GPT-4o / Claude 3.5 Sonnet to verify th
 * `dafny-autopilot.dafnyPath`: Path to your Dafny executable (e.g., `/opt/homebrew/bin/Dafny`)
 * `openai.apiKey`: Your OpenAI API key (for using GPT models)
 * `anthropic.apiKey`: Your Anthropic API key (for using Claude models)
+* `aws.accessKeyId` and `aws.secretAccessKey`: Your AWS keys with Bedrock API access
+* `dafny-autopilot.numIterations`: Number of iterations for Dafny Autopilot to try and verify a Dafny file
 <br>
 
 
@@ -63,10 +66,19 @@ We're working on improving LLM prompting to increase the verification success ra
 
 ## Release Notes
 
-### 1.0.0
+### 0.0.1
 
 Initial release.
+
+### 0.1.1
+
+Include AWS Bedrock integration.
+Include annotation explanation feature.
+
+### 0.2.0
+Update Anthropic and AWS Bedrock to use Claude 3.5 Sonnet (new - 10/22/2024)
 <br><br>
+
 
 
 ## Contributions

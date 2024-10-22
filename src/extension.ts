@@ -32,7 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
             }
             const filePath = uri.fsPath;
             const newFileName = `${path.parse(filePath).name}_with_hints${path.parse(filePath).ext}`;
-            callFillHints('claude-3-5-sonnet-20240620', filePath, newFileName);
+            callFillHints('claude-3-5-sonnet-latest', filePath, newFileName);
         }),
 
         vscode.commands.registerCommand('dafny-autopilot.GeminiFillHints', async (uri: vscode.Uri) => {
@@ -51,7 +51,7 @@ export function activate(context: vscode.ExtensionContext) {
                 return;
             }
             const filePath = uri.fsPath;
-            callLangChain('claude-3-5-sonnet-20240620', filePath, outputChannel);
+            callLangChain('claude-3-5-sonnet-latest', filePath, outputChannel);
         }),
 
         vscode.commands.registerCommand('dafny-autopilot.GPTLangchain', async (uri: vscode.Uri) => {
@@ -78,7 +78,7 @@ export function activate(context: vscode.ExtensionContext) {
                 return;
             }
             const filePath = uri.fsPath;
-            callLangChain('anthropic.claude-3-5-sonnet-20240620-v1:0', filePath, outputChannel);
+            callLangChain('anthropic.claude-3-5-sonnet-20241022-v2:0', filePath, outputChannel);
         }),
 
         vscode.commands.registerCommand('dafny-autopilot.GPTTranslatePython', async (uri: vscode.Uri) => {
@@ -96,7 +96,7 @@ export function activate(context: vscode.ExtensionContext) {
                 return;
             }
             const filePath = uri.fsPath;
-            callTranslatePython('claude-3-5-sonnet-20240620', filePath);
+            callTranslatePython('claude-3-5-sonnet-latest', filePath);
         }),
         
         vscode.commands.registerCommand('dafny-autopilot.explainDafnyAnnotationGPT', async () => {
@@ -126,7 +126,7 @@ export function activate(context: vscode.ExtensionContext) {
                 vscode.window.showErrorMessage('No text selected.');
                 return;
             }
-            explainDafnyAnnotation('claude-3-5-sonnet-20240620', selectedText, outputChannel);
+            explainDafnyAnnotation('claude-3-5-sonnet-latest', selectedText, outputChannel);
         }),
 
         vscode.commands.registerCommand('dafny-autopilot.explainDafnyAnnotationAWSBedrock', async () => {
@@ -141,7 +141,7 @@ export function activate(context: vscode.ExtensionContext) {
                 vscode.window.showErrorMessage('No text selected.');
                 return;
             }
-            explainDafnyAnnotation('anthropic.claude-3-5-sonnet-20240620-v1:0', selectedText, outputChannel);
+            explainDafnyAnnotation('anthropic.claude-3-5-sonnet-20241022-v2:0', selectedText, outputChannel);
         }),
 
         vscode.commands.registerCommand('dafny-autopilot.toggleDevFeatures', () => {

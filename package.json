@@ -53,6 +53,10 @@
       {
         "command": "dafny-autopilot.explainDafnyAnnotationAWSBedrock",
         "title": "Dafny Autopilot: Explain Dafny Annotation (AWS Bedrock)"
+      },
+      {
+        "command": "dafny-autopilot.verifyHighlightedDafny",
+        "title": "Dafny Autopilot: Verify Highlighted Dafny Function (Claude 3.5)"
       }
     ],
     "menus": {
@@ -99,6 +103,11 @@
         },
         {
           "command": "dafny-autopilot.explainDafnyAnnotationAWSBedrock",
+          "group": "navigation",
+          "when": "resourceLangId == dafny && editorHasSelection"
+        },
+        {
+          "command": "dafny-autopilot.verifyHighlightedDafny",
           "group": "navigation",
           "when": "resourceLangId == dafny && editorHasSelection"
         }

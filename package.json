@@ -64,22 +64,22 @@
         {
           "command": "dafny-autopilot.GPTLangchain",
           "group": "navigation",
-          "when": "resourceLangId == dafny"
+          "when": "resourceLangId == dafny && !editorHasSelection"
         },
         {
           "command": "dafny-autopilot.ClaudeLangchain",
           "group": "navigation",
-          "when": "resourceLangId == dafny"
+          "when": "resourceLangId == dafny && !editorHasSelection"
         },
         {
           "command": "dafny-autopilot.GeminiLangchain",
           "group": "navigation",
-          "when": "resourceLangId == dafny"
+          "when": "resourceLangId == dafny && !editorHasSelection"
         },
         {
           "command": "dafny-autopilot.AWSLangchain",
           "group": "navigation",
-          "when": "resourceLangId == dafny"
+          "when": "resourceLangId == dafny && !editorHasSelection"
         },
         {
           "command": "dafny-autopilot.GPTTranslatePython",

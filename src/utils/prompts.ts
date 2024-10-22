@@ -280,7 +280,7 @@ Rules:
 - Strongest Postconditions
 - Consider all outcomes of code execution
 - No weak or unnecessary postconditions
-- Tag New Postconditions with "//+LLM"
+- Tag the Postconditions you add with "//+LLM"
 - Do Not Change Existing Code Body
 Think:
 - Step-by-step list of the reasoning behind each added postcondition in bullet-point format.
@@ -320,7 +320,7 @@ Rules:
 - Loop Variables must relate to the loop's properties.
 - Include Bounds in the loop invariant.
 - Consider the Postcondition in the loop invariant.
-- Tag Added Loop Invariants with "//+LLM"
+- Tag the Loop Invariants you add with "//+LLM"
 - Do Not Change Existing Code Body
 - No Unnecessary Loop Invariants
 Think:

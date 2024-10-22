@@ -7,3 +7,11 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## [Unreleased]
 
 - Initial release
+
+## [v1.1.1]
+
+- Include AWS Bedrock Claude 3.5 Sonnet API
+- Include annotation explanation
+
+# [v1.2.0]
+- Update Anthropic and AWS Bedrock to new Claude 3.5 Sonnet model

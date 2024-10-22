@@ -66,16 +66,16 @@ We're working on improving LLM prompting to increase the verification success ra
 
 ## Release Notes
 
-### 1.0.0
+### 0.0.1
 
 Initial release.
 
-### 1.1.1
+### 0.1.1
 
 Include AWS Bedrock integration.
 Include annotation explanation feature.
 
-### 1.2.0
+### 0.2.0
 Update Anthropic and AWS Bedrock to use Claude 3.5 Sonnet (new - 10/22/2024)
 <br><br>
 

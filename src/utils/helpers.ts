@@ -584,7 +584,7 @@ export async function verifyHighlightedDafny(model: string, selectedText: string
         await callLangChain(model, tempFilePath, outputChannel);
 
         // Optionally, you can delete the temporary file after processing if desired
-        // await fs.unlink(tempFilePath);
+        await fs.unlink(tempFilePath);
 
     } catch (error) {
         vscode.window.showErrorMessage(`Error verifying Dafny function: ${(error as Error).message}`);

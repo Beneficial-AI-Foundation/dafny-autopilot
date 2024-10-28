@@ -34,9 +34,37 @@ Dafny Autopilot is an AI tool leveraging GPT-4o / Claude 3.5 Sonnet / Gemini 1.5
 <p align="center">
   <img src="assets/output_demo.png" width="800px"/>
 </p>
+
+
+## Verify Selection 
+1. In a `.dfy` file, highlight a selection of methods, functions, predicates, or lemmas, and right-click
+1. Select `Dafny Autopilot: Verify Highlighted Dafny Function`.
+1. Once the langchain completes, a comparison window will highlight the LLM's suggestions.
+
+<p align="center">
+  <img src="assets/highlight_select.png" width="800px"/>
+</p>
+
+<p align="center">
+  <img src="assets/highlight_select_output.png" width="800px"/>
+</p>
+
 <br>
 
+## Explain an Annotation
+1. In a `.dfy` file, highlight a line with an annotation you want explained, and right-click.
+1. Select `Dafny Autopilot: Explain Dafny Annotation`
+1. Once the langchain completes, an English explanation of the Dafny annotation will appear in the Panel Output channel named `Dafny Autopilot`
 
+<p align="center">
+  <img src="assets/get_annotation_explanation.png" width="800px"/>
+</p>
+
+<p align="center">
+  <img src="assets/annotation_explanation.png" width="800px"/>
+</p>
+
+<br>
 
 ## Extension Settings ⚙️
 
@@ -77,6 +105,9 @@ Include annotation explanation feature.
 
 ### 0.2.0
 Update Anthropic and AWS Bedrock to use Claude 3.5 Sonnet (new - 10/22/2024)
+
+### 0.3.0
+Include highlight-and-verify feature
 <br><br>
 
 

@@ -573,3 +573,22 @@ async function explainUsingAWSBedrock(apiKey: string, sysPrompt: string, userPro
     const response = await bedrock.invoke(userPrompt);
     return (response.content as string);
 }
+
+export async function verifyHighlightedDafny(model: string, selectedText: string, filePath: string, outputChannel: vscode.OutputChannel) {
+    try {
+        // Create a temporary file containing the selectedText
+        const tempFilePath = filePath.replace(/(\.\w+)?$/, '_selected$1'); // Append '_selected' before the extension
+        await fs.writeFile(tempFilePath, selectedText);
+
+        // Call callLangChain with model, tempFilePath, and outputChannel
+        await callLangChain(model, tempFilePath, outputChannel);
+
+        // Optionally, you can delete the temporary file after processing if desired
+        await fs.unlink(tempFilePath);
+
+    } catch (error) {
+        vscode.window.showErrorMessage(`Error verifying Dafny function: ${(error as Error).message}`);
+        console.error(error);
+    }
+}
+

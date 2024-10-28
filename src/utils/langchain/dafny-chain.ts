@@ -190,6 +190,44 @@ export class DafnyChain {
         }
     }
 
+
+    async processHighlightedDafny(model: string, selectedText: string, filePath: string, outputChannel: vscode.OutputChannel): Promise<string> {
+        try {
+            const dafnyChain = new DafnyChain(model, outputChannel);
+            vscode.window.showInformationMessage('Verifying highlighted Dafny function...');
+            
+            const newFilePath = filePath.replace('.dfy', '_modified.dfy');
+            let modifiedCode = await dafnyChain.applyChains(selectedText);
+            
+            // Write the modified code to the new file
+            await vscode.workspace.fs.writeFile(vscode.Uri.file(newFilePath), Buffer.from(modifiedCode));
+            
+            // Run Dafny verification
+            const dafnyPath = await ensureDafnyPath();
+            if (dafnyPath) {
+                const { stdout, stderr } = await runDafny(filePath, newFilePath, dafnyPath);
+                outputChannel.appendLine('\nDafny verification result:');
+                outputChannel.appendLine(stdout);
+                if (stderr) {
+                    outputChannel.appendLine('Errors:');
+                    outputChannel.appendLine(stderr);
+                }
+
+                if (stderr) {
+                    vscode.window.showWarningMessage('Dafny verification completed with warnings / errors. Check the output channel for details.');
+                } else {
+                    vscode.window.showInformationMessage('Dafny verification completed successfully.');
+                }
+            }
+
+            return newFilePath;
+        } catch (error) {
+            vscode.window.showErrorMessage('Error verifying Dafny function.');
+            console.error(error);
+            throw error;
+        }
+    }
+
     private async prepareModifiedFile(filePath: string): Promise<string> {
         let code = this.readDafnyFile(filePath);
         this.log(`Reading Dafny code from file: ${filePath}`);

@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { callFillHints, callTranslatePython, callLangChain, explainDafnyAnnotation } from './utils/helpers';
+import { callFillHints, callTranslatePython, callLangChain, explainDafnyAnnotation, verifyHighlightedDafny } from './utils/helpers';
 
 let disposables: vscode.Disposable[] | undefined;
 let outputChannel: vscode.OutputChannel;
@@ -149,6 +149,21 @@ export function activate(context: vscode.ExtensionContext) {
             config.update('enableDevelopmentFeatures', !currentValue, vscode.ConfigurationTarget.Workspace);
             vscode.window.showInformationMessage(`Development features ${!currentValue ? 'enabled' : 'disabled'}`);
             outputChannel.appendLine(`Development features toggled to: ${!currentValue}`);
+        }),
+        vscode.commands.registerCommand('dafny-autopilot.verifyHighlightedDafny', async () => {
+            const editor = vscode.window.activeTextEditor;
+            if (!editor) {
+                vscode.window.showErrorMessage('No active editor.');
+                return;
+            }
+            const selection = editor.selection;
+            const selectedText = editor.document.getText(selection);
+            if (!selectedText) {
+                vscode.window.showErrorMessage('No text selected.');
+                return;
+            }
+            const filePath = editor.document.uri.fsPath;
+            verifyHighlightedDafny('claude-3-5-sonnet-20240620', selectedText, filePath, outputChannel);
         })
     ];
     context.subscriptions.push(...disposables);

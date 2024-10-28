@@ -4,7 +4,7 @@
   "publisher": "BeneficialAIFoundation",
   "description": "LLM-based Dafny Autopilot extension for Visual Studio Code",
   "repository": "https://github.com/Beneficial-AI-Foundation/dafny-autopilot",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "engines": {
     "vscode": "^1.90.0"
   },
@@ -53,6 +53,10 @@
       {
         "command": "dafny-autopilot.explainDafnyAnnotationAWSBedrock",
         "title": "Dafny Autopilot: Explain Dafny Annotation (AWS Bedrock)"
+      },
+      {
+        "command": "dafny-autopilot.verifyHighlightedDafny",
+        "title": "Dafny Autopilot: Verify Highlighted Dafny Function (Claude 3.5)"
       }
     ],
     "menus": {
@@ -60,22 +64,22 @@
         {
           "command": "dafny-autopilot.GPTLangchain",
           "group": "navigation",
-          "when": "resourceLangId == dafny"
+          "when": "resourceLangId == dafny && !editorHasSelection"
         },
         {
           "command": "dafny-autopilot.ClaudeLangchain",
           "group": "navigation",
-          "when": "resourceLangId == dafny"
+          "when": "resourceLangId == dafny && !editorHasSelection"
         },
         {
           "command": "dafny-autopilot.GeminiLangchain",
           "group": "navigation",
-          "when": "resourceLangId == dafny"
+          "when": "resourceLangId == dafny && !editorHasSelection"
         },
         {
           "command": "dafny-autopilot.AWSLangchain",
           "group": "navigation",
-          "when": "resourceLangId == dafny"
+          "when": "resourceLangId == dafny && !editorHasSelection"
         },
         {
           "command": "dafny-autopilot.GPTTranslatePython",
@@ -99,6 +103,11 @@
         },
         {
           "command": "dafny-autopilot.explainDafnyAnnotationAWSBedrock",
+          "group": "navigation",
+          "when": "resourceLangId == dafny && editorHasSelection"
+        },
+        {
+          "command": "dafny-autopilot.verifyHighlightedDafny",
           "group": "navigation",
           "when": "resourceLangId == dafny && editorHasSelection"
         }

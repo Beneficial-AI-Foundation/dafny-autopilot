@@ -15,3 +15,6 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [v0.2.0]
 - Update Anthropic and AWS Bedrock to new Claude 3.5 Sonnet model
+
+## [v0.3.0]
+- Include highlight-and-verify feature

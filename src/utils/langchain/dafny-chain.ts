@@ -59,7 +59,7 @@ export class DafnyChain {
             this.llm = new ChatBedrockConverse({ 
                 model: this.modelName, 
                 temperature: 0.1,
-                region: 'us-east-1',
+                region: 'us-west-2',
                 maxTokens: 4096,
                 credentials: {
                     accessKeyId: accessKeyId,

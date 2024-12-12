@@ -566,7 +566,7 @@ async function explainUsingAWSBedrock(apiKey: string, sysPrompt: string, userPro
     const secretAccessKey = apiKey.split(':')[1];
     const bedrock = new ChatBedrockConverse({ 
         credentials: { accessKeyId, secretAccessKey },
-        region: 'us-east-1',
+        region: 'us-west-2',
         model: model,
         maxTokens: 4096
     });

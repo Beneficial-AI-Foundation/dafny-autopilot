@@ -228,9 +228,9 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.24.3",
     "@google/generative-ai": "^0.17.1",
-    "@langchain/aws": "^0.1.0",
     "@langchain/anthropic": "^0.2.11",
-    "@langchain/community": "^0.2.19",
+    "@langchain/aws": "^0.1.0",
+    "@langchain/community": "^0.3.18",
     "@langchain/core": "^0.2.21",
     "@langchain/google-genai": "^0.0.26",
     "@vscode/vsce": "^3.1.0",

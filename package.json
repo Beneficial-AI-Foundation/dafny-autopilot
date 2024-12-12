@@ -208,6 +208,7 @@
     "build-dev": "node esbuild.mjs"
   },
   "devDependencies": {
+    "@types/ini": "^4.1.1",
     "@types/mocha": "^10.0.7",
     "@types/node": "20.x",
     "@types/sinon": "^17.0.3",

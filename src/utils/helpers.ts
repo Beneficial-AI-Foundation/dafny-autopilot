@@ -2,6 +2,8 @@ import * as vscode from 'vscode';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as process from 'process';
+import * as ini from 'ini';
+import * as os from 'os';
 import OpenAI from 'openai';
 import Anthropic from '@anthropic-ai/sdk';
 import { ChatBedrockConverse } from '@langchain/aws';
@@ -352,11 +354,73 @@ export async function askAWSSecretAccessKey(): Promise<string> {
     }
 }
 
+export async function readAWSCredentials(): Promise<{ accessKeyId?: string; secretAccessKey?: string }> {
+    try {
+        const credentialsPath = path.join(os.homedir(), '.aws', 'credentials');
+        const credentialsContent = await fs.readFile(credentialsPath, 'utf-8');
+        const credentials = parseIni(credentialsContent);
+        
+        // Try to read from default profile first
+        if (credentials.default) {
+            return {
+                accessKeyId: credentials.default.aws_access_key_id,
+                secretAccessKey: credentials.default.aws_secret_access_key
+            };
+        }
+        
+        // If no default profile, try to read from the first available profile
+        const firstProfile = Object.values(credentials)[0];
+        if (firstProfile) {
+            return {
+                accessKeyId: firstProfile.aws_access_key_id,
+                secretAccessKey: firstProfile.aws_secret_access_key
+            };
+        }
+    } catch (error) {
+        // File doesn't exist or can't be read
+        console.log('Could not read AWS credentials file:', error);
+    }
+    
+    return { accessKeyId: undefined, secretAccessKey: undefined };
+}
+
+// Simple INI parser function since we're not using the ini package
+function parseIni(content: string): Record<string, Record<string, string>> {
+    const result: Record<string, Record<string, string>> = {};
+    let currentSection: Record<string, string> = {};
+    let currentSectionName = '';
+
+    content.split(/\r?\n/).forEach(line => {
+        line = line.trim();
+        if (!line || line.startsWith('#')) { return; }
+
+        const sectionMatch = line.match(/^\[(.*)\]$/);
+        if (sectionMatch) {
+            currentSectionName = sectionMatch[1];
+            currentSection = {};
+            result[currentSectionName] = currentSection;
+            return;
+        }
+
+        const [key, ...valueParts] = line.split('=');
+        if (key && valueParts.length > 0) {
+            const trimmedKey = key.trim();
+            const trimmedValue = valueParts.join('=').trim();
+            currentSection[trimmedKey] = trimmedValue;
+        }
+    });
+
+    return result;
+}
+
 // Ensure both AWS credentials are set
 export async function ensureAWSCredentials(): Promise<{ accessKeyId: string; secretAccessKey: string }> {
-    let accessKeyId = await ensureAWSAccessKeyId();
-    let secretAccessKey = await ensureAWSSecretAccessKey();
+    // First try to read from credentials file
+    const fileCredentials = await readAWSCredentials();
+    let accessKeyId = fileCredentials.accessKeyId;
+    let secretAccessKey = fileCredentials.secretAccessKey;
 
+    // If credentials are missing, prompt the user
     while (!accessKeyId || !secretAccessKey) {
         if (!accessKeyId) {
             vscode.window.showWarningMessage('AWS Access Key ID is missing. Please enter it.');

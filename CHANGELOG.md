@@ -18,3 +18,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [v0.3.0]
 - Include highlight-and-verify feature
+
+## [v0.3.1]
+- Read AWS credentials from `~/.aws/credentials`
+- Bump dependency versions

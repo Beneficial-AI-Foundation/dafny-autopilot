@@ -108,6 +108,11 @@ Update Anthropic and AWS Bedrock to use Claude 3.5 Sonnet (new - 10/22/2024)
 
 ### 0.3.0
 Include highlight-and-verify feature
+
+### 0.3.1
+Read AWS credentials from `~/.aws/credentials`
+Bump dependency versions
+
 <br><br>
 
 

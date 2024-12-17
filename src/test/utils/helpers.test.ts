@@ -1,15 +1,27 @@
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
-import { ensureGPTApiKey, askGPTApiKey, ensureClaudeApiKey, askClaudeApiKey, ensureGeminiApiKey, askGeminiApiKey } from '../../utils/helpers';
+import proxyquire = require('proxyquire');
+
+import { ensureGPTApiKey, askGPTApiKey, ensureClaudeApiKey, askClaudeApiKey, ensureGeminiApiKey, askGeminiApiKey, ensureAWSCredentials } from '../../utils/helpers';
 import * as assert from 'assert';
 
 
 suite('Test Helpers', function() {
     let sandbox: sinon.SinonSandbox;
+    let helpers: any;
+    let fsStub: any;
 
     setup(function() {
         // Create a sandbox for stubbing
         sandbox = sinon.createSandbox();
+        // Create fs stub with a mock readFile function
+        fsStub = {
+            readFile: sandbox.stub()
+        };
+        // Use proxyquire to inject our stub
+        helpers = proxyquire('../../utils/helpers', {
+            'fs/promises': fsStub
+        });
     });
 
     teardown(function() {
@@ -201,5 +213,53 @@ suite('Test Helpers', function() {
             // If there is an error in the promise, pass it to 'done' to fail the test
             done(error);
         });
+    });
+
+    test('should read AWS credentials from ~/.aws/credentials file if they exist', async function() {
+        const mockCredentialsContent = `
+[default]
+aws_access_key_id = test-access-key
+aws_secret_access_key = test-secret-key
+`;
+        fsStub.readFile.resolves(mockCredentialsContent);
+
+        const result = await helpers.ensureAWSCredentials();
+
+        assert.strictEqual(result.accessKeyId, 'test-access-key');
+        assert.strictEqual(result.secretAccessKey, 'test-secret-key');
+    });
+
+    test('should prompt for AWS credentials if credentials file cannot be read', async function() {
+        fsStub.readFile.rejects(new Error('ENOENT: no such file or directory'));
+
+        const showInputBoxStub = sandbox.stub(vscode.window, 'showInputBox');
+        showInputBoxStub.onFirstCall().resolves('test-access-key');
+        showInputBoxStub.onSecondCall().resolves('test-secret-key');
+
+        const showWarningMessageStub = sandbox.stub(vscode.window, 'showWarningMessage');
+
+        const result = await helpers.ensureAWSCredentials();
+
+        assert.strictEqual(result.accessKeyId, 'test-access-key');
+        assert.strictEqual(result.secretAccessKey, 'test-secret-key');
+
+        sinon.assert.calledWith(showWarningMessageStub, 
+            'AWS Access Key ID is missing. Please enter it.');
+        sinon.assert.calledWith(showWarningMessageStub, 
+            'AWS Secret Access Key is missing. Please enter it.');
+    });
+
+    test('should read non-default profile from credentials file if default is missing', async function() {
+        const mockCredentialsContent = `
+[profile1]
+aws_access_key_id = test-access-key
+aws_secret_access_key = test-secret-key
+`;
+        fsStub.readFile.resolves(mockCredentialsContent);
+
+        const result = await helpers.ensureAWSCredentials();
+
+        assert.strictEqual(result.accessKeyId, 'test-access-key');
+        assert.strictEqual(result.secretAccessKey, 'test-secret-key');
     });
 });

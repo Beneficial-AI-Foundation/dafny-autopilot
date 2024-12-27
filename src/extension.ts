@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { callFillHints, callTranslatePython, callLangChain, explainDafnyAnnotation, verifyHighlightedDafny } from './utils/helpers';
+import { callFillHints, callTranslatePython, callLangChain, explainDafnyAnnotation, verifyHighlightedDafny,
+    promptForModelProvider, promptForModelId, formatModelString
+ } from './utils/helpers';
 
 let disposables: vscode.Disposable[] | undefined;
 let outputChannel: vscode.OutputChannel;
@@ -164,6 +166,43 @@ export function activate(context: vscode.ExtensionContext) {
             }
             const filePath = editor.document.uri.fsPath;
             verifyHighlightedDafny('claude-3-5-sonnet-20240620', selectedText, filePath, outputChannel);
+        }),
+        vscode.commands.registerCommand('dafny-autopilot.runLangchain', async (uri: vscode.Uri) => {
+            if (!uri) {
+                vscode.window.showErrorMessage('This command must be invoked from a file context.');
+                return;
+            }
+        
+            // Get current config
+            const config = vscode.workspace.getConfiguration('dafny-autopilot');
+            let provider = config.get<string>('modelProvider');
+            let modelId = config.get<string>('modelId');
+        
+            // If either setting is missing, prompt user
+            if (!provider || !modelId) {
+                // Prompt for provider selection
+                provider = await promptForModelProvider();
+                if (!provider) {
+                    return; // User cancelled
+                }
+        
+                // Prompt for model ID based on provider
+                modelId = await promptForModelId(provider);
+                if (!modelId) {
+                    return; // User cancelled
+                }
+        
+                // Save preferences
+                await config.update('modelProvider', provider, vscode.ConfigurationTarget.Global);
+                await config.update('modelId', modelId, vscode.ConfigurationTarget.Global);
+            }
+        
+            // Convert provider and modelId to the format expected by callLangChain
+            const modelString = formatModelString(provider, modelId);
+            
+            // Call LangChain with the file and model
+            const filePath = uri.fsPath;
+            callLangChain(modelString, filePath, outputChannel);
         })
     ];
     context.subscriptions.push(...disposables);

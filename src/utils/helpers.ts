@@ -656,3 +656,58 @@ export async function verifyHighlightedDafny(model: string, selectedText: string
     }
 }
 
+export async function promptForModelProvider(): Promise<string | undefined> {
+    const providers = ['Anthropic', 'OpenAI', 'AWS Bedrock', 'Gemini'];
+    return await vscode.window.showQuickPick(providers, {
+        placeHolder: 'Select an AI model provider',
+        ignoreFocusOut: true
+    });
+}
+
+export async function promptForModelId(provider: string): Promise<string | undefined> {
+    let placeHolder: string;
+    let defaultModel: string;
+    
+    switch (provider) {
+        case 'Anthropic':
+            placeHolder = 'e.g., claude-3-5-sonnet-latest';
+            defaultModel = 'claude-3-5-sonnet-latest';
+            break;
+        case 'OpenAI':
+            placeHolder = 'e.g., gpt-4';
+            defaultModel = 'gpt-4';
+            break;
+        case 'AWS Bedrock':
+            placeHolder = 'e.g., anthropic.claude-3';
+            defaultModel = 'anthropic.claude-3';
+            break;
+        case 'Gemini':
+            placeHolder = 'e.g., gemini-1.5-pro';
+            defaultModel = 'gemini-1.5-pro';
+            break;
+        default:
+            return undefined;
+    }
+
+    return await vscode.window.showInputBox({
+        prompt: `Enter the model ID for ${provider}`,
+        placeHolder,
+        value: defaultModel,
+        ignoreFocusOut: true
+    });
+}
+
+export function formatModelString(provider: string, modelId: string): string {
+    switch (provider) {
+        case 'OpenAI':
+            return modelId.startsWith('gpt-') ? modelId : `gpt-${modelId}`;
+        case 'Anthropic':
+            return modelId.startsWith('claude-') ? modelId : `claude-${modelId}`;
+        case 'AWS Bedrock':
+            return modelId.startsWith('anthropic.') ? modelId : `anthropic.${modelId}`;
+        case 'Gemini':
+            return modelId.startsWith('gemini-') ? modelId : `gemini-${modelId}`;
+        default:
+            throw new Error('Unsupported provider');
+    }
+}

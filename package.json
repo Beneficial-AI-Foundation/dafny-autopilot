@@ -57,6 +57,10 @@
       {
         "command": "dafny-autopilot.verifyHighlightedDafny",
         "title": "Dafny Autopilot: Verify Highlighted Dafny Function (Claude 3.5)"
+      },
+      {
+        "command": "dafny-autopilot.runLangchain",
+        "title": "Dafny Autopilot: Verify Dafny File"
       }
     ],
     "menus": {
@@ -110,6 +114,11 @@
           "command": "dafny-autopilot.verifyHighlightedDafny",
           "group": "navigation",
           "when": "resourceLangId == dafny && editorHasSelection"
+        },
+        {
+          "command": "dafny-autopilot.runLangchain",
+          "group": "navigation",
+          "when": "resourceLangId == dafny"
         }
       ],
       "explorer/context": [
@@ -142,6 +151,11 @@
           "command": "dafny-autopilot.ClaudeTranslatePython",
           "group": "navigation",
           "when": "resourceLangId == python && config.dafny-autopilot.enableDevelopmentFeatures"
+        },
+        {
+          "command": "dafny-autopilot.runLangchain",
+          "group": "navigation",
+          "when": "resourceLangId == dafny"
         }
       ]
     },
@@ -188,6 +202,17 @@
           "type": "boolean",
           "default": false,
           "description": "Enable development-only features"
+        },
+        "dafny-autopilot.modelProvider": {
+          "type": "string",
+          "enum": ["Anthropic", "OpenAI", "AWS Bedrock", "Gemini"],
+          "default": "",
+          "description": "Selected AI model provider"
+        },
+        "dafny-autopilot.modelId": {
+          "type": "string",
+          "default": "",
+          "description": "Selected model ID for the chosen provider"
         }
       }
     }

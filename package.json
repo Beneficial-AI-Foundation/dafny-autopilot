@@ -61,6 +61,10 @@
       {
         "command": "dafny-autopilot.runLangchain",
         "title": "Dafny Autopilot: Verify Dafny File"
+      },
+      {
+        "command": "dafny-autopilot.setModel",
+        "title": "Dafny Autopilot: Set AI Model Provider and Model ID"
       }
     ],
     "menus": {
@@ -119,6 +123,11 @@
           "command": "dafny-autopilot.runLangchain",
           "group": "navigation",
           "when": "resourceLangId == dafny"
+        },
+        {
+          "command": "dafny-autopilot.setModel",
+          "group": "navigation",
+          "when": "resourceLangId == dafny"
         }
       ],
       "explorer/context": [
@@ -154,6 +163,11 @@
         },
         {
           "command": "dafny-autopilot.runLangchain",
+          "group": "navigation",
+          "when": "resourceLangId == dafny"
+        },
+        {
+          "command": "dafny-autopilot.setModel",
           "group": "navigation",
           "when": "resourceLangId == dafny"
         }

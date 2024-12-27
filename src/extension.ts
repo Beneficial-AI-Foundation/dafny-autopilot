@@ -203,7 +203,28 @@ export function activate(context: vscode.ExtensionContext) {
             // Call LangChain with the file and model
             const filePath = uri.fsPath;
             callLangChain(modelString, filePath, outputChannel);
-        })
+        }),
+        vscode.commands.registerCommand('dafny-autopilot.setModel', async () => {
+            // Prompt for provider selection
+            const provider = await promptForModelProvider();
+            if (!provider) {
+                return; // User cancelled
+            }
+        
+            // Prompt for model ID based on provider
+            const modelId = await promptForModelId(provider);
+            if (!modelId) {
+                return; // User cancelled
+            }
+        
+            // Save preferences globally
+            const config = vscode.workspace.getConfiguration('dafny-autopilot');
+            await config.update('modelProvider', provider, vscode.ConfigurationTarget.Global);
+            await config.update('modelId', modelId, vscode.ConfigurationTarget.Global);
+        
+            // Show confirmation
+            vscode.window.showInformationMessage(`Model set to: ${formatModelString(provider, modelId)}`);
+        }),
     ];
     context.subscriptions.push(...disposables);
     outputChannel.appendLine("Dafny Autopilot extension activated");

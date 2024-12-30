@@ -56,31 +56,31 @@ export class DafnyChain {
             const { homedir } = await import('os');
             const { parse } = await import('ini');
         
-            let region;
-            try {
-                const credentialsPath = join(homedir(), '.aws', 'credentials');
-                const credentials = parse(await readFile(credentialsPath, 'utf-8'));
-                if (credentials.default?.region) {
-                    region = credentials.default.region;
-                }
-            } catch {
-                region = await this.promptForAWSRegion();
-            }
+            
+            // let region = await vscode.window.showQuickPick(['us-east-1', 'us-west-2', 'eu-west-1', 'eu-central-1', 'ap-northeast-1'], {
+            //     placeHolder: 'Select AWS Region',
+            //     ignoreFocusOut: true
+            // });
+            let region = await this.promptForAWSRegion();
+            
+            
         
             const accessKeyId = process.env.BEDROCK_AWS_ACCESS_KEY_ID;
             const secretAccessKey = process.env.BEDROCK_AWS_SECRET_ACCESS_KEY;
             if (!accessKeyId || !secretAccessKey) {
                 throw new Error('AWS credentials not found in environment variables.');
             }
+        
             this.llm = new ChatBedrockConverse({ 
-                model: this.modelName, 
-                temperature: 0.1,
-                region,
-                maxTokens: 4096,
+                model: this.modelName,
                 credentials: {
-                    accessKeyId: accessKeyId,
-                    secretAccessKey: secretAccessKey
-                }});
+                    accessKeyId,
+                    secretAccessKey
+                },
+                temperature: 0.1,
+                maxTokens: 4096,
+                region
+            });
         } else {
             throw new Error(`Unsupported model: ${this.modelName}`);
         }
@@ -100,7 +100,6 @@ export class DafnyChain {
     }
 
     private async promptForAWSRegion(): Promise<string> {
-        const vscode = await import('vscode');
         const regions = [
             { label: 'us-east-1', description: 'US East (N. Virginia)' },
             { label: 'us-east-2', description: 'US East (Ohio)' },

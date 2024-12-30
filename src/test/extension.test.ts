@@ -242,28 +242,24 @@ suite('Extension Test Suite', () => {
     });
 
     test('Should handle AWS region from credentials or prompt', async () => {
-        const showQuickPickStub = sandbox.stub(vscode.window, 'showQuickPick')
-            .resolves({ label: 'us-west-2', description: 'US West (Oregon)' });
-        const readFileStub = sandbox.stub(fs.promises, 'readFile');
         const outputChannel = vscode.window.createOutputChannel("Test Channel");
         
         process.env.BEDROCK_AWS_ACCESS_KEY_ID = 'test-key';
         process.env.BEDROCK_AWS_SECRET_ACCESS_KEY = 'test-secret';
         
-        readFileStub.rejects(new Error('File not found'));
-        const dafnyChain = new DafnyChain('anthropic.claude-1234', outputChannel);
-        await dafnyChain['initializeDependencies']();
+        const showQuickPickStub = sandbox.stub(vscode.window, 'showQuickPick')
+            .resolves({ label: 'us-west-2', description: 'US West (Oregon)' });
         
-        assert.ok(showQuickPickStub.calledOnce);
-        
-        readFileStub.resolves('[default]\nregion=eu-west-1\n');
-        const dafnyChain2 = new DafnyChain('anthropic.claude-1234', outputChannel);
-        await dafnyChain2['initializeDependencies']();
-        
-        assert.ok(showQuickPickStub.calledOnce);
-        
-        delete process.env.BEDROCK_AWS_ACCESS_KEY_ID;
-        delete process.env.BEDROCK_AWS_SECRET_ACCESS_KEY;
-        outputChannel.dispose();
+        try {
+            const dafnyChain = new DafnyChain('anthropic.claude-1234', outputChannel);
+            await dafnyChain['initializeDependencies']();
+            
+            assert.ok(showQuickPickStub.calledOnce);
+        } finally {
+            // Clean up
+            delete process.env.BEDROCK_AWS_ACCESS_KEY_ID;
+            delete process.env.BEDROCK_AWS_SECRET_ACCESS_KEY;
+            outputChannel.dispose();
+        }
     });
 });

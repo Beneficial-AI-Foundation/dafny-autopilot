@@ -51,6 +51,22 @@ export class DafnyChain {
             });
         } else if (this.modelName.startsWith('anthropic.')) {
             const { ChatBedrockConverse } = await import('@langchain/aws');
+            const { readFile } = await import('fs/promises');
+            const { join } = await import('path');
+            const { homedir } = await import('os');
+            const { parse } = await import('ini');
+        
+            let region;
+            try {
+                const credentialsPath = join(homedir(), '.aws', 'credentials');
+                const credentials = parse(await readFile(credentialsPath, 'utf-8'));
+                if (credentials.default?.region) {
+                    region = credentials.default.region;
+                }
+            } catch {
+                region = await this.promptForAWSRegion();
+            }
+        
             const accessKeyId = process.env.BEDROCK_AWS_ACCESS_KEY_ID;
             const secretAccessKey = process.env.BEDROCK_AWS_SECRET_ACCESS_KEY;
             if (!accessKeyId || !secretAccessKey) {
@@ -59,7 +75,7 @@ export class DafnyChain {
             this.llm = new ChatBedrockConverse({ 
                 model: this.modelName, 
                 temperature: 0.1,
-                region: 'us-west-2',
+                region,
                 maxTokens: 4096,
                 credentials: {
                     accessKeyId: accessKeyId,
@@ -81,6 +97,25 @@ export class DafnyChain {
         this.fixSyntaxChain = RunnableSequence.from([this.fixSyntaxTemplate, this.llm, this.outputParser]);
         this.fixChain = RunnableSequence.from([this.fixTemplate, this.llm, this.outputParser]);
         this.postconditionChain = RunnableSequence.from([this.postconditionTemplate, this.llm, this.outputParser]);
+    }
+
+    private async promptForAWSRegion(): Promise<string> {
+        const vscode = await import('vscode');
+        const regions = [
+            'us-east-1', 'us-east-2', 'us-west-1', 'us-west-2',
+            'eu-west-1', 'eu-west-2', 'eu-central-1',
+            'ap-northeast-1', 'ap-southeast-1', 'ap-southeast-2'
+        ];
+    
+        const region = await vscode.window.showQuickPick(regions, {
+            placeHolder: 'Select AWS Region',
+            ignoreFocusOut: true
+        });
+    
+        if (!region) {
+            throw new Error('AWS Region is required for Bedrock.');
+        }
+        return region;
     }
 
     private readDafnyFile(filePath: string): string {

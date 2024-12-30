@@ -102,9 +102,16 @@ export class DafnyChain {
     private async promptForAWSRegion(): Promise<string> {
         const vscode = await import('vscode');
         const regions = [
-            'us-east-1', 'us-east-2', 'us-west-1', 'us-west-2',
-            'eu-west-1', 'eu-west-2', 'eu-central-1',
-            'ap-northeast-1', 'ap-southeast-1', 'ap-southeast-2'
+            { label: 'us-east-1', description: 'US East (N. Virginia)' },
+            { label: 'us-east-2', description: 'US East (Ohio)' },
+            { label: 'us-west-1', description: 'US West (N. California)' },
+            { label: 'us-west-2', description: 'US West (Oregon)' },
+            { label: 'eu-west-1', description: 'Europe (Ireland)' },
+            { label: 'eu-west-2', description: 'Europe (London)' },
+            { label: 'eu-central-1', description: 'Europe (Frankfurt)' },
+            { label: 'ap-northeast-1', description: 'Asia Pacific (Tokyo)' },
+            { label: 'ap-southeast-1', description: 'Asia Pacific (Singapore)' },
+            { label: 'ap-southeast-2', description: 'Asia Pacific (Sydney)' }
         ];
     
         const region = await vscode.window.showQuickPick(regions, {
@@ -115,7 +122,7 @@ export class DafnyChain {
         if (!region) {
             throw new Error('AWS Region is required for Bedrock.');
         }
-        return region;
+        return region.label;
     }
 
     private readDafnyFile(filePath: string): string {

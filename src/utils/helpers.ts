@@ -152,7 +152,7 @@ async function GeminiFillHints(
         const result = await model.generateContent([sysPrompt, userPrompt]);
         return result.response.text();
     } catch (error) {
-        vscode.window.showErrorMessage("Error connecting to Anthropic API.");
+        vscode.window.showErrorMessage("Error connecting to Google Generative AI API.");
         console.error(error);
     }
 }

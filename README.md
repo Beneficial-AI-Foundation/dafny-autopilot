@@ -11,7 +11,7 @@ Dafny Autopilot is an AI tool leveraging GPT-4o / Claude 3.5 Sonnet / Gemini 1.5
 <br>
 
 
-## Installataion 🔧
+## Installation 🔧
 
 1. Install Dafny on your machine by following [this tutorial](https://dafny.org/dafny/Installation).
 2. You may need to install `Z3` and `dotnet` as well.
